@@ -1,8 +1,8 @@
 name: Build .net io module for Linux
 
 on:
+#  workflow_call:
   workflow_dispatch:
-  workflow_call:
     inputs:
       repository:  # id of input
         description: 'The repository of the io module'
