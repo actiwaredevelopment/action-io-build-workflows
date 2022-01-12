@@ -2,7 +2,7 @@ name: Build .net io module for Windows
 
 on:
   workflow_call:
-    intputs:
+    inputs:
       repository:  # id of input
         description: 'The repository of the io module'
         required: true
