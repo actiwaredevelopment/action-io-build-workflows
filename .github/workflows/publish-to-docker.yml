@@ -18,11 +18,6 @@ on:
         required: true
         type: string
         default: ''
-      dockerfile:
-        description: 'The dockerfile that should be used'
-        required: false
-        type: string
-        default: './.github/docker/dockerfile'
 
     secrets:
       docker-username:
@@ -61,5 +56,5 @@ jobs:
         with:
           context: .
           tags: ${{ inputs.image-name }}:${{ inputs.image-tag }}
-          file: ${{ inputs.docker-file }}
+          file: dockerfile
           push: true

@@ -9,6 +9,7 @@ jobs:
       uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/build-dotnet-io-module.yml@main
       with:
         repository: ${{ github.repository }}
+        branch: ${{ github.ref_name }}
         dotnet-version: 6.0.x
         project: src/service-v2/service/io2-module-template-service.csproj
         modulefile: 'module.zip'
@@ -17,7 +18,6 @@ jobs:
         rid: 'win-x64'
         create-single-file: true
       secrets:
-        token: ${{ secrets.GITHUB_TOKEN }}
         action-user: ${{ secrets.GH_ACTION_USER }}
         action-token: ${{ secrets.GH_ACTION_TOKEN }}
         awdev-nuget-source: ${{ secrets.AWDEV_NUGET_URL }}
@@ -43,6 +43,7 @@ jobs:
       uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/build-dotnet-io-module.yml@main
       with:
         repository: ${{ github.repository }}
+        branch: ${{ github.ref_name }}
         dotnet-version: 6.0.x
         project: src/service-v2/service/io2-module-template-service.csproj
         modulefile: 'module.zip'
@@ -51,7 +52,6 @@ jobs:
         rid: 'linux-x64'
         create-single-file: false
       secrets:
-        token: ${{ secrets.GITHUB_TOKEN }}
         action-user: ${{ secrets.GH_ACTION_USER }}
         action-token: ${{ secrets.GH_ACTION_TOKEN }}
         awdev-nuget-source: ${{ secrets.AWDEV_NUGET_URL }}
@@ -77,6 +77,7 @@ jobs:
       uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/build-dotnet-io-module.yml@main
       with:
         repository: ${{ github.repository }}
+        branch: ${{ github.ref_name }}
         dotnet-version: 6.0.x
         project: src/service-v2/service/io2-module-template-service.csproj
         modulefile: 'module.zip'
@@ -85,7 +86,6 @@ jobs:
         rid: 'macos-x64'
         create-single-file: true
       secrets:
-        token: ${{ secrets.GITHUB_TOKEN }}
         action-user: ${{ secrets.GH_ACTION_USER }}
         action-token: ${{ secrets.GH_ACTION_TOKEN }}
         awdev-nuget-source: ${{ secrets.AWDEV_NUGET_URL }}
@@ -112,6 +112,7 @@ jobs:
       uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/build-dotnet-io-module.yml@main
       with:
         repository: ${{ github.repository }}
+        branch: ${{ github.ref_name }}
         dotnet-version: 6.0.x
         project: src/service-v2/service/io2-module-template-service.csproj
         module-source-path: './module-definition'
@@ -122,7 +123,6 @@ jobs:
         rid: 'win-x64'
         create-single-file: true
       secrets:
-        token: ${{ secrets.GITHUB_TOKEN }}
         action-user: ${{ secrets.GH_ACTION_USER }}
         action-token: ${{ secrets.GH_ACTION_TOKEN }}
         awdev-nuget-source: ${{ secrets.AWDEV_NUGET_URL }}
@@ -135,7 +135,6 @@ jobs:
         artifact: ${{ needs.build-windows.outputs.downloads }}
         image-name: 'actiwareio/io-module-template'
         image-tag: 2-latest
-        dockerfile: '.github/docker/dockerfile'
       secrets:
         docker-username: ${{ secrets.DOCKER_HUB_USER }}
         docker-password: ${{ secrets.DOCKER_HUB_SECRET }}

@@ -58,10 +58,13 @@ on:
         required: false
         type: string
         default: 'BuildOutput'
+      branch:
+        description: 'The name of the branch that should be checkout'
+        required: false
+        type: string
+        default: ''
 
     secrets:
-      token:
-        required: true
       action-user:
         required: true
       action-token:
@@ -104,57 +107,55 @@ jobs:
           echo "::endgroup::"
 
       - name: Checkout repository
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.token }}
         run: |
           git clone https://${{secrets.action-user}}:${{secrets.action-token}}@github.com/${{ inputs.repository }}.git .
-          mv ${{ inputs.dockerfile }} ./dockerfile
 
-      # - uses: actions/checkout@v2.4.0
-      #   with:
-      #     repository: ${{ inputs.repository }}
-      #     ref: main
-      #     token: ${{ secrets.token }}
+          if [ ${{ inputs.branch }} != '' ]
+          then
+             git switch ${{ inputs.branch }}
+          fi
+
+          mv ${{ inputs.dockerfile }} ./dockerfile
 
       - name: Display structure of downloaded files
         run: ls -a
 
-      # - name: Setup .NET
-      #   uses: actions/setup-dotnet@v1
-      #   with:
-      #     dotnet-version: ${{ inputs.dotnet-version }}
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ inputs.dotnet-version }}
 
-      # - name: Ensure GitHub NuGet Source
-      #   run: |
-      #     dotnet nuget add source -u ${{ secrets.action-user }} -p ${{ secrets.action-token }} --store-password-in-clear-text --name github ${{ secrets.awdev-nuget-source }}
+      - name: Ensure GitHub NuGet Source
+        run: |
+          dotnet nuget add source -u ${{ secrets.action-user }} -p ${{ secrets.action-token }} --store-password-in-clear-text --name github ${{ secrets.awdev-nuget-source }}
 
       - name: Create npmrc
         run: |
           echo "${{ secrets.npmrc-config }}" > .npmrc
 
-      # - name: Restore dependencies
-      #   run: dotnet restore ${{ inputs.project }}
+      - name: Restore dependencies
+        run: dotnet restore ${{ inputs.project }}
 
-      # - name: Build
-      #   run: dotnet build ${{ inputs.project }} --configuration Release --force
+      - name: Build
+        run: dotnet build ${{ inputs.project }} --configuration Release --force
 
-      # - name: Publish
-      #   if: ${{ inputs.create-single-file }} == true
-      #   run: |
-      #     dotnet publish ${{ inputs.project }} -c Release -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true --self-contained true -o out --force
-      #   env:
-      #     npm_config_userconfig: '${{ github.workspace }}/.npmrc'
-      #     npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
-      #     NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
+      - name: Publish
+        if: ${{ inputs.create-single-file }} == true
+        run: |
+          dotnet publish ${{ inputs.project }} -c Release -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true --self-contained true -o out --force
+        env:
+          npm_config_userconfig: '${{ github.workspace }}/.npmrc'
+          npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
+          NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
 
-      # - name: Publish
-      #   if: ${{ inputs.create-single-file }} == false 
-      #   run: |
-      #     dotnet publish ${{ inputs.project }} -c Release -r ${{ inputs.rid }} -o out --force
-      #   env:
-      #     npm_config_userconfig: '${{ github.workspace }}/.npmrc'
-      #     npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
-      #     NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
+      - name: Publish
+        if: ${{ inputs.create-single-file }} == false 
+        run: |
+          dotnet publish ${{ inputs.project }} -c Release -r ${{ inputs.rid }} -o out --force
+        env:
+          npm_config_userconfig: '${{ github.workspace }}/.npmrc'
+          npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
+          NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
 
       - name: 'Create module definition file'
         uses: vimtor/action-zip@v1
@@ -175,14 +176,16 @@ jobs:
           FILE_NAME: './version.txt'
           FILE_DATA: '${{ steps.module-version.outputs.version }}-developer'
 
-      # - name: Add follow items to artifact
-      #   run: |
-      #     echo "${{ github.workspace }}/${{ inputs.modulefile }}"
-      #     echo "${{ inputs.module-info-json }}"
-      #     echo "${{ inputs.dockerfile }}"
-      #     echo "${{ inputs.ui-build-path }}"
-      #     echo "./version.txt"
-      #     echo "./out"
+      - name: Add follow items to artifact
+        run: |
+          echo "::group::Added files to artifact"
+          echo "${{ github.workspace }}/${{ inputs.modulefile }}"
+          echo "${{ inputs.module-info-json }}"
+          echo "${{ inputs.ui-build-path }}"
+          echo "./dockerfile"
+          echo "./version.txt"
+          echo "./out"
+          echo "::endgroup::"
 
       - name: 'Upload the Publish Artifact'
         uses: actions/upload-artifact@v2.2.2
