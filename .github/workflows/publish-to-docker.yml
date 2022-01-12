@@ -20,7 +20,7 @@ on:
         default: ''
       docker-file:
         description: 'The dockerfile that should be used'
-        required: true
+        required: false
         type: string
         default: './.github/docker/dockerfile'
 
