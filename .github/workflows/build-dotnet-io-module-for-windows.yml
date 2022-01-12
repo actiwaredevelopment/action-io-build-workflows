@@ -47,8 +47,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        repository: ${{ inputs.repository }}
-        token: ${{ secrets.token }}
+        with:
+          repository: ${{ inputs.repository }}
+          token: ${{ secrets.token }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
