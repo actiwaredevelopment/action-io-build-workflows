@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      download: 'ServiceForWindows'
+      download: 'BuildOutputWindows'
 
     steps:
       - uses: actions/checkout@v2
@@ -121,7 +121,7 @@ jobs:
       - name: 'Upload the Publish Artifact'
         uses: actions/upload-artifact@v2.2.2
         with:
-          name: BuildOutput
+          name: BuildOutputWindows
           path: |
             ${{ inputs.dockerfile }}
             ${{ github.workspace }}/${{ inputs.modulefile }}
@@ -132,4 +132,4 @@ jobs:
           retention-days: 1
 
       - name: Set outputs
-        run: echo "::set-output name=download::BuildOutput"
+        run: echo "::set-output name=download::BuildOutputWindows"
