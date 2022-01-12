@@ -1,33 +1,6 @@
 name: Build .net io module for Linux
 
 on:
-  workflow_dispatch:
-    inputs:
-      repository:  # id of input
-        description: 'The repository of the io module'
-        required: true
-        type: string
-        default: ''
-      branch:  # id of input
-        description: 'The branch that should be used'
-        required: true
-        type: string
-        default: main
-      dotnet-version:  # id of input
-        description: 'The dotnet version that should be used for the build process.'
-        required: true
-        type: string
-        default: 6.0.x
-      project:
-        description: 'The project that should be build'
-        required: true
-        type: string
-        default: ''
-      modulefile:
-        description: 'How to name the output file (ZIP archive) for the module'
-        required: true
-        type: string
-        default: 'module.zip'
   workflow_call:
     inputs:
       repository:  # id of input
