@@ -23,8 +23,18 @@ on:
         required: true
         type: string
         default: 'module.zip'
-      dockerfile:
+      module-source-path:
         description: 'The name of the module definition file (ZIP Archive)'
+        required: false
+        type: string
+        default: './module-definition'
+      module-info-json:
+        description: 'The name of the module definition file (ZIP Archive)'
+        required: false
+        type: string
+        default: './module-definition/info.json'
+      dockerfile:
+        description: 'The name of the docker file that should be added to the download'
         required: false
         type: string
         default: './.github/docker/dockerfile'
@@ -93,7 +103,7 @@ jobs:
         uses: vimtor/action-zip@v1
         with:
           dest: ${{ inputs.modulefile }}
-          files: './module-definition'
+          files: ${{ inputs.module-source-path }}
           recursive: true
 
       - name: Get module version
@@ -111,14 +121,15 @@ jobs:
       - name: 'Upload the Publish Artifact'
         uses: actions/upload-artifact@v2.2.2
         with:
-          name: ServiceForWindows
+          name: BuildOutput
           path: |
+            ${{ inputs.dockerfile }}
+            ${{ github.workspace }}/${{ inputs.modulefile }}
+            ${{ inputs.module-info-json }}
             ./version.txt
             ./out
             ./src/configuration/build
-            ${{ github.workspace }}/${{ inputs.modulefile }}
-            ./module-definition/info.json
-            ${{ inputs.dockerfile }}
+          retention-days: 1
 
       - name: Set outputs
-        run: echo "::set-output name=download::ServiceForWindows"
+        run: echo "::set-output name=download::BuildOutput"
