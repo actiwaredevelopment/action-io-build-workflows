@@ -89,17 +89,19 @@ jobs:
     steps:
       - name: Build conditions
         run: |
-          echo "::debug::Set the inputs variable repository to ${{ inputs.repository }}"
-          echo "::debug::Set the inputs variable project to ${{ inputs.project }}"
-          echo "::debug::Set the inputs variable dotnet to ${{ inputs.dotnet-version }}"
-          echo "::debug::Set the inputs variable modulefile to ${{ inputs.modulefile }}"
-          echo "::debug::Set the inputs variable module-source-path to ${{ inputs.module-source-path }}"
-          echo "::debug::Set the inputs variable module-info-json to ${{ inputs.module-info-json }}"
-          echo "::debug::Set the inputs variable ui-build-path to ${{ inputs.ui-build-path }}"
-          echo "::debug::Set the inputs variable dockerfile to ${{ inputs.dockerfile }}"
-          echo "::debug::Set the inputs variable create-single-file to ${{ inputs.create-single-file }}"
-          echo "::debug::Set the inputs variable rid to ${{ inputs.rid }}"
-          echo "::debug::Set the inputs variable artifact-name to ${{ inputs.artifact-name }}"
+          echo "::group::Print build conditions"
+          echo "Set the inputs variable repository to ${{ inputs.repository }}"
+          echo "Set the inputs variable project to ${{ inputs.project }}"
+          echo "Set the inputs variable dotnet to ${{ inputs.dotnet-version }}"
+          echo "Set the inputs variable modulefile to ${{ inputs.modulefile }}"
+          echo "Set the inputs variable module-source-path to ${{ inputs.module-source-path }}"
+          echo "Set the inputs variable module-info-json to ${{ inputs.module-info-json }}"
+          echo "Set the inputs variable ui-build-path to ${{ inputs.ui-build-path }}"
+          echo "Set the inputs variable dockerfile to ${{ inputs.dockerfile }}"
+          echo "Set the inputs variable create-single-file to ${{ inputs.create-single-file }}"
+          echo "Set the inputs variable rid to ${{ inputs.rid }}"
+          echo "Set the inputs variable artifact-name to ${{ inputs.artifact-name }}"
+          echo "::endgroup::
 
       - uses: actions/checkout@v2
         with:
