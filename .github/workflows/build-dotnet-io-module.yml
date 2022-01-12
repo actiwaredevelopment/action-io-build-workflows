@@ -49,7 +49,7 @@ on:
         type: boolean
         default: false
       rid: 
-        description: 'Angabe des RID's für Windows (win-x64, win-x86, win-arm, win-arm64) oder Linux (linux-x64, linux-musl-x64, linux-arm, linux-arm64) oder MacOS (osx-x64)'
+        description: 'Specification of the RID for Windows (win-x64, win-x86, win-arm, win-arm64) or Linux (linux-x64, linux-musl-x64, linux-arm, linux-arm64) or MacOS (osx-x64)'
         required: false
         type: string
         default: 'linux-x64'
