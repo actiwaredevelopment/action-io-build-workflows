@@ -1,4 +1,4 @@
-name: Build .net io module for Windows
+name: Publish to docker hub
 
 on:
   workflow_call:
