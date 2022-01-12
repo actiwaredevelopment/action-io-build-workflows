@@ -63,6 +63,11 @@ on:
         required: false
         type: string
         default: ''
+      version-postfix:
+        description: 'A postfix for the determined version'
+        required: false
+        type: string
+        default: ''
 
     secrets:
       action-user:
@@ -174,7 +179,7 @@ jobs:
         uses: finnp/create-file-action@master
         env:
           FILE_NAME: './version.txt'
-          FILE_DATA: '${{ steps.module-version.outputs.version }}-developer'
+          FILE_DATA: '${{ steps.module-version.outputs.version }}${{ inputs.version-postfix }}'
 
       - name: Add follow items to artifact
         run: |
