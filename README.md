@@ -50,7 +50,7 @@ jobs:
         npmrc-config: ${{ secrets.NPMRC_CONFIG }}
 
     docker:
-      uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/publish-to-docker@main
+      uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/publish-to-docker.yml@main
       with:
         artifact: ${{ needs.build-windows.outputs.downloads }}
         image-name: 'actiwareio/io-module-template'
