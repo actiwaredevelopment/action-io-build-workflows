@@ -11,6 +11,8 @@ jobs:
         repository: ${{ github.repository }}
         dotnet-version: 6.0.x
         project: src/service-v2/service/io2-module-template-service.csproj
+        modulefile: 'module.zip'
+        dockerfile: './.github/docker/dockerfile'
       secrets:
         token: ${{ secrets.GITHUB_TOKEN }}
         action-user: ${{ secrets.GH_ACTION_USER }}
@@ -41,6 +43,8 @@ jobs:
         repository: ${{ github.repository }}
         dotnet-version: 6.0.x
         project: src/service-v2/service/io2-module-template-service.csproj
+        modulefile: 'module.zip'
+        dockerfile: './.github/docker/dockerfile'
       secrets:
         token: ${{ secrets.GITHUB_TOKEN }}
         action-user: ${{ secrets.GH_ACTION_USER }}
@@ -55,6 +59,7 @@ jobs:
         artifact: ${{ needs.build-windows.outputs.downloads }}
         image-name: 'actiwareio/io-module-template'
         image-tag: 2-latest
+        dockerfile: './.github/docker/dockerfile'
       secrets:
         docker-username: ${{ secrets.DOCKER_HUB_USER }}
         docker-password: ${{ secrets.DOCKER_HUB_SECRET }}

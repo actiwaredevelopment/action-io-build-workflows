@@ -50,6 +50,7 @@ on:
 
 jobs:
   build:
+    name: build windows
     runs-on: ubuntu-latest
 
     outputs:
