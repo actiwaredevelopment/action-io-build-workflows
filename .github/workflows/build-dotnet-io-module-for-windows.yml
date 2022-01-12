@@ -1,0 +1,111 @@
+name: Build .net io module for Windows
+
+on:
+  workflow_call:
+    intputs:
+      repository:  # id of input
+        description: 'The repository of the io module'
+        required: true
+        type: string
+        default: ${{ github.repository }}
+      dotnet-version:  # id of input
+        description: 'The dotnet version'
+        required: true
+        type: string
+        default: 6.0.x
+      project:
+        description: 'The project that should be build'
+        required: true
+        type: string
+        default: ''
+
+    secrets:
+      token:
+        required: true
+      action-user:
+        required: true
+      action-token:
+        required: true
+      awdev-nuget-source:
+        required: true
+      npm-package-token:
+        required: true
+      npmrc-config:
+        required: true
+
+    outputs:
+      download:
+        description: Return the name of the artifact download
+        value: ${{ jobs.build.outputs.download }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    outputs:
+      download: 'ServiceForWindows'
+
+    steps:
+      - uses: actions/checkout@v2
+        repository: ${{ inputs.repository }}
+        token: ${{ secrets.token }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ inputs.dotnet-version }}
+
+      - name: Ensure GitHub NuGet Source
+        run: |
+          dotnet nuget add source -u ${{ secrets.action-user }} -p ${{ secrets.action-token }} --store-password-in-clear-text --name github ${{ secrets.awdev-nuget-source }}
+
+      - name: Create npmrc
+        run: |
+          echo "${{ secrets.npmrc-config }}" > .npmrc
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ inputs.project }}
+
+      - name: Build
+        run: dotnet build ${{ inputs.project }} --configuration Release --force
+
+      - name: Publish
+        run: |
+          dotnet publish ${{ inputs.project }} -c Release -r win-x64 -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true --self-contained true -o out --force
+        env:
+          npm_config_userconfig: '${{ github.workspace }}/.npmrc'
+          npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
+          NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
+
+      - name: 'Create module definition file'
+        uses: vimtor/action-zip@v1
+        with:
+          dest: salesforce.zip
+          files: './module-definition'
+          recursive: true
+
+      - name: Get module version
+        id: module-version
+        uses: actiwaredevelopment/action-io-get-module-version@v0.1
+        with:
+          module-definition-file: './module-definition/info.json'
+
+      - name: 'Create version information'
+        uses: finnp/create-file-action@master
+        env:
+          FILE_NAME: './version.txt'
+          FILE_DATA: '${{ steps.module-version.outputs.version }}-developer'
+
+      - name: 'Upload the Publish Artifact'
+        uses: actions/upload-artifact@v2.2.2
+        with:
+          name: ServiceForWindows
+          path: |
+            ./version.txt
+            ./out
+            ./src/configuration/build
+            ${{ github.workspace }}/salesforce.zip
+            ./module-definition/info.json
+
+      - name: Set outputs
+        run: echo "::set-output name=download::ServiceForWindows"
