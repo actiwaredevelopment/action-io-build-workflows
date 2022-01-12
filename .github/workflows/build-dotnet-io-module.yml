@@ -7,7 +7,7 @@ on:
         description: 'The repository of the io module'
         required: true
         type: string
-        default: ${{ github.repository }}
+        default: ''
       branch:  # id of input
         description: 'The branch that should be used'
         required: true
