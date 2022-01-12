@@ -71,15 +71,12 @@ on:
     outputs:
       download:
         description: Return the name of the artifact download
-        value: ${{ jobs.build.outputs.download }}
+        value: 'BuildOutput'
 
 jobs:
   build:
     name: build for ${{ inputs.rid }}
     runs-on: ubuntu-latest
-
-    outputs:
-      download: 'BuildOutput'
 
     steps:
       - uses: actions/checkout@v2
@@ -165,5 +162,3 @@ jobs:
             ./out
           retention-days: 1
 
-      - name: Set outputs
-        run: echo "::set-output name=download::BuildOutput"
