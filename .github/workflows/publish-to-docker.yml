@@ -59,7 +59,7 @@ jobs:
       - name: 'Build and Publish to Docker Hub'
         uses: docker/build-push-action@v2
         with:
-          context: ./${{ inputs.artifact }}
+          context: .
           tags: ${{ inputs.image-name }}:${{ inputs.image-tag }}
           file: ${{ inputs.docker-file }}
           push: true

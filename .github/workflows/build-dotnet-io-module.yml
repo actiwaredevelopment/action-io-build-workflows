@@ -87,6 +87,10 @@ jobs:
       download: ${{ inputs.artifact-name }}
 
     steps:
+      - name: Build conditions
+        run: |
+          echo "::notice repository=${{ inputs.repository }},project=${{ inputs.project }},dotnet=${{ inputs.dotnet-version }},modulefile=${{ inputs.modulefile }},module-source-path=${{ inputs.module-source-path }},module-info-json=${{ inputs.module-info-json }},ui-build-path=${{ inputs.ui-build-path }},dockerfile=${{ inputs.dockerfile }},create-single-file=${{ inputs.create-single-file }},rid=${{ inputs.rid }},artifact-name=${{ inputs.artifact-name }}"
+
       - uses: actions/checkout@v2
         with:
           repository: ${{ inputs.repository }}
