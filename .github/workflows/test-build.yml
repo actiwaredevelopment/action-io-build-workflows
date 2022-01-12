@@ -8,6 +8,7 @@ jobs:
     uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/build-dotnet-io-module.yml@main
     with:
       repository: 'actiwaredevelopment/io2-module-salesforce'
+      branch: main
       dotnet-version: 6.0.x
       project: src/service-v2/service/io2-module-salesforce-service.csproj
       modulefile: salesforce.zip
@@ -16,7 +17,6 @@ jobs:
       rid: 'linux-x64'
       create-single-file: false
     secrets:
-      token: ${{ secrets.GITHUB_TOKEN }}
       action-user: ${{ secrets.GH_ACTION_USER }}
       action-token: ${{ secrets.GH_ACTION_TOKEN }}
       awdev-nuget-source: ${{ secrets.AWDEV_NUGET_URL }}
