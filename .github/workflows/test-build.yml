@@ -8,6 +8,7 @@ jobs:
     uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/build-dotnet-io-module.yml@main
     with:
       repository: actiwaredevelopment/io2-module-salesforce
+      branch: main
       dotnet-version: 6.0.x
       project: src/service-v2/service/io2-module-salesforce-service.csproj
       modulefile: salesforce.zip
