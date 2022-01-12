@@ -103,9 +103,10 @@ jobs:
           echo "Set the inputs variable artifact-name to ${{ inputs.artifact-name }}"
           echo "::endgroup::"
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2.4.0
         with:
           repository: ${{ inputs.repository }}
+          ref: main
           token: ${{ secrets.token }}
 
       - name: Display structure of downloaded files
