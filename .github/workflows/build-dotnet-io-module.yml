@@ -107,7 +107,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.token }}
         run: |
-          git clone https://${{secrets.action-user}}:${{secrets.action-token}}@github.com/${{ inputs.repository }}.git
+          git clone https://${{secrets.action-user}}:${{secrets.action-token}}@github.com/${{ inputs.repository }}.git .
 
       # - uses: actions/checkout@v2.4.0
       #   with:
