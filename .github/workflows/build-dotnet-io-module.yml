@@ -107,7 +107,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.token }}
         run: |
-          npm run release
           git remote rm origin
           git remote add origin https://${{github.actor}}:${{secrets.token}}@github.com/${{ inputs.repository }}.git
           git remote -v # for debug only 
