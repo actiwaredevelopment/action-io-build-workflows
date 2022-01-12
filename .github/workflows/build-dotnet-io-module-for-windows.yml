@@ -18,6 +18,16 @@ on:
         required: true
         type: string
         default: ''
+     modulefile:
+        description: 'The name of the module definition file (ZIP Archive)'
+        required: true
+        type: string
+        default: 'module.zip'
+      dockerfile:
+        description: 'The name of the module definition file (ZIP Archive)'
+        required: false
+        type: string
+        default: './.github/docker/dockerfile'
 
     secrets:
       token:
@@ -81,7 +91,7 @@ jobs:
       - name: 'Create module definition file'
         uses: vimtor/action-zip@v1
         with:
-          dest: salesforce.zip
+          dest: ${{ inputs.modulefile }}
           files: './module-definition'
           recursive: true
 
@@ -105,8 +115,9 @@ jobs:
             ./version.txt
             ./out
             ./src/configuration/build
-            ${{ github.workspace }}/salesforce.zip
+            ${{ github.workspace }}/${{ inputs.modulefile }}
             ./module-definition/info.json
+            ${{ inputs.dockerfile }}
 
       - name: Set outputs
         run: echo "::set-output name=download::ServiceForWindows"
