@@ -4,6 +4,13 @@ on:
   workflow_dispatch:
 
 jobs:
+  print:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Echo
+        run: echo "${{ github.repository }}"
+
   build:
     uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/build-dotnet-io-module.yml@main
     with:
