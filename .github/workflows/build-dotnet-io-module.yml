@@ -53,6 +53,11 @@ on:
         required: false
         type: string
         default: 'linux-x64'
+      artifact-name:
+        description: 'The name of the artifact'
+        required: false
+        type: string
+        default: 'BuildOutput'
 
     secrets:
       token:
@@ -71,12 +76,15 @@ on:
     outputs:
       download:
         description: Return the name of the artifact download
-        value: 'BuildOutput'
+        value: ${{ jobs.build.outputs.download }}
 
 jobs:
   build:
     name: build for ${{ inputs.rid }}
     runs-on: ubuntu-latest
+
+    outputs:
+      download: ${{ inputs.artifact-name }}
 
     steps:
       - uses: actions/checkout@v2
@@ -152,7 +160,7 @@ jobs:
       - name: 'Upload the Publish Artifact'
         uses: actions/upload-artifact@v2.2.2
         with:
-          name: BuildOutput
+          name: ${{ inputs.artifact-name }}
           path: |
             ${{ github.workspace }}/${{ inputs.modulefile }}
             ${{ inputs.module-info-json }}
