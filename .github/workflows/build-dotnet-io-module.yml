@@ -108,6 +108,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.token }}
         run: |
           git clone https://${{secrets.action-user}}:${{secrets.action-token}}@github.com/${{ inputs.repository }}.git .
+          mv ${{ inputs.dockerfile }} ./dockerfile
 
       # - uses: actions/checkout@v2.4.0
       #   with:
@@ -190,8 +191,8 @@ jobs:
           path: |
             ${{ github.workspace }}/${{ inputs.modulefile }}
             ${{ inputs.module-info-json }}
-            ${{ inputs.dockerfile }}
             ${{ inputs.ui-build-path }}
+            ./dockerfile
             ./version.txt
             ./out
           retention-days: 1
