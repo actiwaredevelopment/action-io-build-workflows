@@ -89,7 +89,17 @@ jobs:
     steps:
       - name: Build conditions
         run: |
-          echo "::notice repository=${{ inputs.repository }},project=${{ inputs.project }},dotnet=${{ inputs.dotnet-version }},modulefile=${{ inputs.modulefile }},module-source-path=${{ inputs.module-source-path }},module-info-json=${{ inputs.module-info-json }},ui-build-path=${{ inputs.ui-build-path }},dockerfile=${{ inputs.dockerfile }},create-single-file=${{ inputs.create-single-file }},rid=${{ inputs.rid }},artifact-name=${{ inputs.artifact-name }}"
+          echo "::debug::Set the inputs variable repository to ${{ inputs.repository }}"
+          echo "::debug::Set the inputs variable project to ${{ inputs.project }}"
+          echo "::debug::Set the inputs variable dotnet to ${{ inputs.dotnet-version }}"
+          echo "::debug::Set the inputs variable modulefile to ${{ inputs.modulefile }}"
+          echo "::debug::Set the inputs variable module-source-path to ${{ inputs.module-source-path }}"
+          echo "::debug::Set the inputs variable module-info-json to ${{ inputs.module-info-json }}"
+          echo "::debug::Set the inputs variable ui-build-path to ${{ inputs.ui-build-path }}"
+          echo "::debug::Set the inputs variable dockerfile to ${{ inputs.dockerfile }}"
+          echo "::debug::Set the inputs variable create-single-file to ${{ inputs.create-single-file }}"
+          echo "::debug::Set the inputs variable rid to ${{ inputs.rid }}"
+          echo "::debug::Set the inputs variable artifact-name to ${{ inputs.artifact-name }}"
 
       - uses: actions/checkout@v2
         with:
