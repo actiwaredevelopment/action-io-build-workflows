@@ -8,11 +8,6 @@ on:
         required: true
         type: string
         default: ${{ github.repository }}
-      branch:  # id of input
-        description: 'The branch that should be used'
-        required: true
-        type: string
-        default: main
       dotnet-version:  # id of input
         description: 'The dotnet version that should be used for the build process.'
         required: true
