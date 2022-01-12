@@ -107,17 +107,13 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.token }}
         run: |
-          git remote rm origin
-          git remote add origin https://${{github.actor}}:${{secrets.token}}@github.com/${{ inputs.repository }}.git
-          git remote -v # for debug only 
-          git show-ref # for debug only 
-          git push --follow-tags origin HEAD:main
+          git clone https://${{github.actor}}:${{secrets.token}}@github.com/${{ inputs.repository }}.git
 
-      - uses: actions/checkout@v2.4.0
-        with:
-          repository: ${{ inputs.repository }}
-          ref: main
-          token: ${{ secrets.token }}
+      # - uses: actions/checkout@v2.4.0
+      #   with:
+      #     repository: ${{ inputs.repository }}
+      #     ref: main
+      #     token: ${{ secrets.token }}
 
       - name: Display structure of downloaded files
         run: ls -R
