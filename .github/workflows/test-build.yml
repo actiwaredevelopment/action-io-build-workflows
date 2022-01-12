@@ -1,0 +1,24 @@
+name: Test action
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/build-dotnet-io-module.yml@main
+    with:
+      repository: actiwaredevelopment/io2-module-salesforce
+      dotnet-version: 6.0.x
+      project: src/service-v2/service/io2-module-salesforce-service.csproj
+      modulefile: salesforce.zip
+      dockerfile: ./.github/docker/dockerfile
+      ui-build-path: ./src/configuration/build
+      rid: 'linux-x64'
+      create-single-file: false
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+      action-user: ${{ secrets.GH_ACTION_USER }}
+      action-token: ${{ secrets.GH_ACTION_TOKEN }}
+      awdev-nuget-source: ${{ secrets.AWDEV_NUGET_URL }}
+      npm-package-token: ${{ secrets.AWDEV_NPM_PACKAGE_TOKEN }}
+      npmrc-config: ${{ secrets.NPMRC_CONFIG }}
