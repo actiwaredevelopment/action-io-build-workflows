@@ -132,7 +132,11 @@ jobs:
         with:
             go-version: ${{ inputs.go-version }}
 
-      - name: 'Build'
+      - name: Inject insteadOf configuration
+        run: |
+          git config --global url."https://{{ secrets.action-user }}:${{ secrets.action-token }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Build
         run: CGO_ENABLED=0 GOOS=${{ inputs.go-os }} GOARCH=${{ inputs.go-arch }} go build -v -o ${{ inputs.outputfile }} ${{ inputs.mainfile }}
         env:
           npm_config_userconfig: '${{ github.workspace }}/.npmrc'
