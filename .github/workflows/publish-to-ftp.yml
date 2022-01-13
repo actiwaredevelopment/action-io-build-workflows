@@ -36,7 +36,7 @@ jobs:
           name: ${{ inputs.artifact }}
 
       - name: FTP Deployment
-        uses: sebastianpopp/ftp-action@releases/v2
+        uses: sebastianpopp/ftp-action@v2.0.0
         with:
           localDir: ./
           remoteDir: ${{ inputs.remote-dir }}
