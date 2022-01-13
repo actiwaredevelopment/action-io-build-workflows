@@ -29,7 +29,6 @@ jobs:
       artifact: TestData
       remote-dir: /Development/actiwareio/Source/Modules/v2/Template/
     secrets:
-      host: ${{ secrets.SFTP_HOST }}
-      port: '522'
+      address: '${{ secrets.SFTP_HOST }}:522'
       user: ${{ secrets.SFTP_USER }}
       password: ${{ secrets.SFTP_PASSWORD }}

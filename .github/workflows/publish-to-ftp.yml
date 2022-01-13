@@ -15,9 +15,7 @@ on:
         default: '/Development/actiwareio/Source/Modules/v2/Template/'
 
     secrets:
-      host:
-        required: true
-      port:
+      address:
         required: true
       user:
         required: true
@@ -38,10 +36,9 @@ jobs:
       - name: FTP Deployment
         uses: sebastianpopp/ftp-action@v2.0.0
         with:
-          localDir: ./
           remoteDir: ${{ inputs.remote-dir }}
           # Deployment destination server & path. Formatted as protocol://domain.com:port/full/destination/path/
-          host: ${{ secrets.host }}:${{ secrets.port }}
+          host: ${{ secrets.address }}
           # FTP account username
           user: ${{ secrets.user }}
           # FTP account password
