@@ -1,0 +1,172 @@
+name: Build nodejs io module
+
+on:
+  workflow_call:
+    inputs:
+      repository:  # id of input
+        description: 'The repository of the io module'
+        required: true
+        type: string
+        default: ${{ github.repository }}
+      mainfile:
+        description: 'The main file that should be build'
+        required: true
+        type: string
+        default: ''
+      outputfile:
+        description: 'The output file that should be created'
+        required: true
+        type: string
+        default: './dist-nodejs'
+      modulefile:
+        description: 'How to name the output file (ZIP archive) for the module'
+        required: true
+        type: string
+        default: 'module.zip'
+      module-source-path:
+        description: 'Enter the source path for the module from which the ZIP file is to be created.'
+        required: false
+        type: string
+        default: './module-definition'
+      module-info-json:
+        description: 'Enter where to find the info.json for the module.'
+        required: false
+        type: string
+        default: './module-definition/info.json'
+      dockerfile:
+        description: 'The name of the docker file that should be added to the download'
+        required: false
+        type: string
+        default: './.github/docker/dockerfile'
+      artifact-name:
+        description: 'The name of the artifact'
+        required: false
+        type: string
+        default: 'BuildOutput'
+      branch:
+        description: 'The name of the branch that should be checkout'
+        required: false
+        type: string
+        default: ''
+      version-postfix:
+        description: 'A postfix for the determined version'
+        required: false
+        type: string
+        default: ''
+      go-arch:
+        description: 'Refers to the architecture to build (386, amd64, amd64p32, arm, arm64, wasm, ...)'
+        required: false
+        type: string
+        default: 'amd64'
+      go-os:
+        description: 'Refers to the operating system to build (linux, windows, ...)'
+        required: false
+        type: string
+        default: 'linux'
+
+    secrets:
+      action-user:
+        required: true
+      action-token:
+        required: true
+      awdev-nuget-source:
+        required: true
+      npm-package-token:
+        required: true
+      npmrc-config:
+        required: true
+
+    outputs:
+      download:
+        description: Return the name of the artifact download
+        value: ${{ jobs.build.outputs.download }}
+
+jobs:
+  build:
+    name: build for ${{ inputs.rid }}
+    runs-on: ubuntu-latest
+
+    outputs:
+      download: ${{ inputs.artifact-name }}
+
+    steps:
+      - name: Build conditions
+        run: |
+          echo "::group::Print build conditions"
+          echo "Set the inputs variable repository to ${{ inputs.repository }}"
+          echo "Set the inputs variable modulefile to ${{ inputs.modulefile }}"
+          echo "Set the inputs variable module-source-path to ${{ inputs.module-source-path }}"
+          echo "Set the inputs variable module-info-json to ${{ inputs.module-info-json }}"
+          echo "Set the inputs variable mainfile to ${{ inputs.mainfile }}"
+          echo "Set the inputs variable outputfile to ${{ inputs.outputfile }}"
+          echo "Set the inputs variable dockerfile to ${{ inputs.dockerfile }}"
+          echo "Set the inputs variable artifact-name to ${{ inputs.artifact-name }}"
+          echo "Set the inputs variable go-arch to ${{ inputs.go-arch }}"
+          echo "Set the inputs variable go-os to ${{ inputs.go-os }}"
+          echo "::endgroup::"
+
+      - name: Checkout repository
+        run: |
+          git clone https://${{secrets.action-user}}:${{secrets.action-token}}@github.com/${{ inputs.repository }}.git .
+
+          if [ ${{ inputs.branch }} != '' ]
+          then
+             git checkout ${{ inputs.branch }} -b latest
+          fi
+
+          mv ${{ inputs.dockerfile }} ./dockerfile
+
+      - name: Display structure of downloaded files
+        run: ls -a
+
+      - name: Create npmrc
+        run: |
+          echo "${{ secrets.npmrc-config }}" > .npmrc
+
+      - name: 'Build'
+        run: CGO_ENABLED=0 GOOS=${{ inputs.go-os }} GOARCH=${{ inputs.go-arch }} go build -v -o ${{ inputs.outputfile }} ${{ inputs.mainfile }}
+        env:
+          npm_config_userconfig: '${{ github.workspace }}/.npmrc'
+          npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
+          NODE_AUTH_TOKEN: ${{ secrets.AWDEV_NPM_PACKAGE_TOKEN }}
+
+      - name: 'Create module definition file'
+        uses: vimtor/action-zip@v1
+        with:
+          dest: ${{ inputs.modulefile }}
+          files: ${{ inputs.module-source-path }}
+          recursive: true
+
+      - name: Get module version
+        id: module-version
+        uses: actiwaredevelopment/action-io-get-module-version@v0.1
+        with:
+          module-definition-file: ${{ inputs.module-info-json }}
+
+      - name: 'Create version information'
+        uses: finnp/create-file-action@master
+        env:
+          FILE_NAME: './version.txt'
+          FILE_DATA: '${{ steps.module-version.outputs.version }}${{ inputs.version-postfix }}'
+
+      - name: Add follow items to artifact
+        run: |
+          echo "::group::Added files to artifact"
+          echo "${{ github.workspace }}/${{ inputs.modulefile }}"
+          echo "${{ inputs.module-info-json }}"
+          echo "${{ inputs.outputfile }}"
+          echo "./dockerfile"
+          echo "./version.txt"
+          echo "::endgroup::"
+
+      - name: 'Upload the Publish Artifact'
+        uses: actions/upload-artifact@v2.2.2
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: |
+            ${{ github.workspace }}/${{ inputs.modulefile }}
+            ${{ inputs.module-info-json }}
+            ${{ inputs.outputfile }}
+            ./dockerfile
+            ./version.txt
+          retention-days: 1

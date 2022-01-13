@@ -136,6 +136,106 @@ jobs:
         name: ${{ needs.build-nodejs.outputs.downloads }}
 ```
 
+## Build workflows for golang IO Modules
+### Build for linux
+```yml
+jobs:
+  build-nodejs:
+    uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/build-golang-io-module.yml@main
+    with:
+      repository: ${{ github.repository }}
+      branch: ${{ github.ref_name }}
+      mainfile: src/service-v2-go/cmd/service/main.go
+      outputfile: io-module-service
+      modulefile: 'module.zip'
+      dockerfile: './.github/docker/dockerfile-nodejs'
+      go-os: 'linux'
+      go-arch: 'amd64'
+    secrets:
+      action-user: ${{ secrets.GH_ACTION_USER }}
+      action-token: ${{ secrets.GH_ACTION_TOKEN }}
+      awdev-nuget-source: ${{ secrets.AWDEV_NUGET_URL }}
+      npm-package-token: ${{ secrets.AWDEV_NPM_PACKAGE_TOKEN }}
+      npmrc-config: ${{ secrets.NPMRC_CONFIG }}
+
+  use-download:
+    name: Use download
+    needs: build-nodejs
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 'Download Artifact'
+      uses: actions/download-artifact@v2.0.8
+      with: 
+        name: ${{ needs.build-nodejs.outputs.downloads }}
+```
+
+### Build for windows
+```yml
+jobs:
+  build-nodejs:
+    uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/build-golang-io-module.yml@main
+    with:
+      repository: ${{ github.repository }}
+      branch: ${{ github.ref_name }}
+      mainfile: src/service-v2-go/cmd/service/main.go
+      outputfile: io-module-service
+      modulefile: 'module.zip'
+      dockerfile: './.github/docker/dockerfile-nodejs'
+      go-os: 'windows'
+      go-arch: 'amd64'
+    secrets:
+      action-user: ${{ secrets.GH_ACTION_USER }}
+      action-token: ${{ secrets.GH_ACTION_TOKEN }}
+      awdev-nuget-source: ${{ secrets.AWDEV_NUGET_URL }}
+      npm-package-token: ${{ secrets.AWDEV_NPM_PACKAGE_TOKEN }}
+      npmrc-config: ${{ secrets.NPMRC_CONFIG }}
+
+  use-download:
+    name: Use download
+    needs: build-nodejs
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 'Download Artifact'
+      uses: actions/download-artifact@v2.0.8
+      with: 
+        name: ${{ needs.build-nodejs.outputs.downloads }}
+```
+
+### Build for macos (M1)
+```yml
+jobs:
+  build-nodejs:
+    uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/build-golang-io-module.yml@main
+    with:
+      repository: ${{ github.repository }}
+      branch: ${{ github.ref_name }}
+      mainfile: src/service-v2-go/cmd/service/main.go
+      outputfile: io-module-service
+      modulefile: 'module.zip'
+      dockerfile: './.github/docker/dockerfile-nodejs'
+      go-os: 'darwin'
+      go-arch: 'arm64'
+    secrets:
+      action-user: ${{ secrets.GH_ACTION_USER }}
+      action-token: ${{ secrets.GH_ACTION_TOKEN }}
+      awdev-nuget-source: ${{ secrets.AWDEV_NUGET_URL }}
+      npm-package-token: ${{ secrets.AWDEV_NPM_PACKAGE_TOKEN }}
+      npmrc-config: ${{ secrets.NPMRC_CONFIG }}
+
+  use-download:
+    name: Use download
+    needs: build-nodejs
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 'Download Artifact'
+      uses: actions/download-artifact@v2.0.8
+      with: 
+        name: ${{ needs.build-nodejs.outputs.downloads }}
+```
+
 ## Publish docker images
 ### Publish to Docker Hub
 ```yml
