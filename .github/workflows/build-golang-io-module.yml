@@ -112,7 +112,6 @@ jobs:
           echo "Set the inputs variable artifact-name to ${{ inputs.artifact-name }}"
           echo "Set the inputs variable go-arch to ${{ inputs.go-arch }}"
           echo "Set the inputs variable go-os to ${{ inputs.go-os }}"
-          echo "Set path to {path}"
           echo "::endgroup::"
 
       - name: Checkout repository
@@ -144,9 +143,9 @@ jobs:
 
       - name: Build
         run: |
-          echo "{path}" >> $GITHUB_PATH
+          pwd=$(pwd)
           cd ${{ inputs.go-mod-path }}
-          CGO_ENABLED=0 GOOS=${{ inputs.go-os }} GOARCH=${{ inputs.go-arch }} go build -v -o $GITHUB_PATH/${{ inputs.outputfile }} ${{ inputs.mainfile }}
+          CGO_ENABLED=0 GOOS=${{ inputs.go-os }} GOARCH=${{ inputs.go-arch }} go build -v -o $pwd/${{ inputs.outputfile }} ${{ inputs.mainfile }}
         env:
           npm_config_userconfig: '${{ github.workspace }}/.npmrc'
           npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
