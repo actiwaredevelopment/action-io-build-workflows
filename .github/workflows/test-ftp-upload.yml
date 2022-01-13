@@ -27,7 +27,7 @@ jobs:
     uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/publish-to-ftp.yml@main
     with:
       artifact: TestData
-      address: '${{ secrets.SFTP_HOST }}:522'
+      address: ${{ secrets.SFTP_HOST }}:522
       remote-dir: /Development/actiwareio/Source/Modules/v2/Template/
     secrets:
       user: ${{ secrets.SFTP_USER }}
