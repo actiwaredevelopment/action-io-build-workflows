@@ -8,6 +8,11 @@ on:
         required: true
         type: string
         default: ''
+      address:
+        description: 'Hostname and port to the ftp server'
+        required: true
+        type: string
+        default: ''
       remote-dir:
         description: 'The ftp remote dir'
         required: true
@@ -40,7 +45,7 @@ jobs:
           localDir: ./download/actiware
           remoteDir: ${{ inputs.remote-dir }}
           # Deployment destination server & path. Formatted as protocol://domain.com:port/full/destination/path/
-          host: ${{ secrets.address }}
+          host: ${{ inputs.address }}
           # FTP account username
           user: ${{ secrets.user }}
           # FTP account password
