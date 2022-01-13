@@ -144,8 +144,8 @@ jobs:
       - name: Build
         run: dotnet build ${{ inputs.project }} --configuration Release --force
 
-      - name: Publish
-        if: ${{ inputs.create-single-file }} == true
+      - name: Publish single file
+        if: ${{ inputs.create-single-file }} == 'true'
         run: |
           dotnet publish ${{ inputs.project }} -c Release -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true --self-contained true -o out --force
         env:
@@ -154,7 +154,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
 
       - name: Publish
-        if: ${{ inputs.create-single-file }} == false 
+        if: ${{ inputs.create-single-file }} == 'false'
         run: |
           dotnet publish ${{ inputs.project }} -c Release -r ${{ inputs.rid }} -o out --force
         env:
