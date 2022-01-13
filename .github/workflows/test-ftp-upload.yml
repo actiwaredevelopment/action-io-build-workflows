@@ -26,7 +26,7 @@ jobs:
     needs: build
     uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/publish-to-ftp.yml@main
     with:
-      artifact: ${{ needs.build.outputs.download }}
+      artifact: TestData
       remote-dir: /Development/actiwareio/Source/Modules/v2/Template/
     secrets:
       host: ${{ secrets.SFTP_HOST }}
