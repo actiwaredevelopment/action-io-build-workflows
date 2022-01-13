@@ -112,6 +112,7 @@ jobs:
           echo "Set the inputs variable artifact-name to ${{ inputs.artifact-name }}"
           echo "Set the inputs variable go-arch to ${{ inputs.go-arch }}"
           echo "Set the inputs variable go-os to ${{ inputs.go-os }}"
+          echo "Set path to {path}"
           echo "::endgroup::"
 
       - name: Checkout repository
@@ -143,10 +144,9 @@ jobs:
 
       - name: Build
         run: |
-          ROOT=pwd
+          echo "{path}" >> $GITHUB_PATH
           cd ${{ inputs.go-mod-path }}
-          CGO_ENABLED=0 GOOS=${{ inputs.go-os }} GOARCH=${{ inputs.go-arch }} go build -v -o ${{ inputs.outputfile }} ${{ inputs.mainfile }}
-          mv ${{ inputs.outputfile }} $ROOT 
+          CGO_ENABLED=0 GOOS=${{ inputs.go-os }} GOARCH=${{ inputs.go-arch }} go build -v -o $GITHUB_PATH/${{ inputs.outputfile }} ${{ inputs.mainfile }}
         env:
           npm_config_userconfig: '${{ github.workspace }}/.npmrc'
           npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
@@ -176,7 +176,7 @@ jobs:
           echo "::group::Added files to artifact"
           echo "${{ github.workspace }}/${{ inputs.modulefile }}"
           echo "${{ inputs.module-info-json }}"
-          echo "${{ inputs.go-mod-path }}/${{ inputs.outputfile }}"
+          echo "${{ inputs.outputfile }}"
           echo "./dockerfile"
           echo "./version.txt"
           echo "::endgroup::"
@@ -188,7 +188,7 @@ jobs:
           path: |
             ${{ github.workspace }}/${{ inputs.modulefile }}
             ${{ inputs.module-info-json }}
-            ${{ inputs.go-mod-path }}/${{ inputs.outputfile }}
+            ${{ inputs.outputfile }}
             ./dockerfile
             ./version.txt
           retention-days: 1
