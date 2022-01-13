@@ -73,7 +73,7 @@ on:
 
 jobs:
   build:
-    name: build for ${{ inputs.rid }}
+    name: build for nodejs
     runs-on: ubuntu-latest
 
     outputs:
@@ -110,6 +110,10 @@ jobs:
       - name: Create npmrc
         run: |
           echo "${{ secrets.npmrc-config }}" > .npmrc
+
+      - name: Inject insteadOf configuration
+        run: |
+            git config --global url."https://{{ secrets.action }}:${{ secrets.GH_ACTION_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
       - name: 'Selecting the service directory'
         run: cd ${{ inputs.project }}

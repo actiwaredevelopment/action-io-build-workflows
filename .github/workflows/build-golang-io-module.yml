@@ -63,6 +63,10 @@ on:
         required: false
         type: string
         default: 'linux'
+      go-version:
+        description: 'Refers to the go version to build'
+        type: string
+        default: '1.15'
 
     secrets:
       action-user:
@@ -83,7 +87,7 @@ on:
 
 jobs:
   build:
-    name: build for ${{ inputs.rid }}
+    name: build for ${{ inputs.go-os }} (${{ inputs.go-arch }})
     runs-on: ubuntu-latest
 
     outputs:
@@ -122,6 +126,11 @@ jobs:
       - name: Create npmrc
         run: |
           echo "${{ secrets.npmrc-config }}" > .npmrc
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+            go-version: ${{ inputs.go-version }}
 
       - name: 'Build'
         run: CGO_ENABLED=0 GOOS=${{ inputs.go-os }} GOARCH=${{ inputs.go-arch }} go build -v -o ${{ inputs.outputfile }} ${{ inputs.mainfile }}
