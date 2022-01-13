@@ -8,6 +8,11 @@ on:
         required: true
         type: string
         default: ${{ github.repository }}
+      go-mod-path:
+        description: 'The directory where the go mod file is located'
+        required: true
+        type: string
+        default: ''
       mainfile:
         description: 'The main file that should be build'
         required: true
@@ -135,6 +140,10 @@ jobs:
       - name: Inject insteadOf configuration
         run: |
           git config --global url."https://{{ secrets.action-user }}:${{ secrets.action-token }}@github.com/".insteadOf "https://github.com/"
+
+      - name: 'Selecting the service directory'
+        if: ${{ inputs.go-mod-path != '' }}
+        run: cd ${{ inputs.go-mod-path }}
 
       - name: Build
         run: CGO_ENABLED=0 GOOS=${{ inputs.go-os }} GOARCH=${{ inputs.go-arch }} go build -v -o ${{ inputs.outputfile }} ${{ inputs.mainfile }}
