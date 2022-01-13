@@ -208,10 +208,9 @@ jobs:
     uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/publish-to-ftp.yml@main
     with:
       artifact: ${{ needs.build.outputs.download }}
-      remote-dir: /Development/actiwareio/Source/Modules/v2/Salesforce/
+      remote-dir: /Development/actiwareio/Source/Modules/v2/Template/
     secrets:
-      host: ${{ secrets.SFTP_HOST }}
-      port: 522
+      address: ${{ secrets.SFTP_HOST }}:522
       user: ${{ secrets.SFTP_USER }}
       password: ${{ secrets.SFTP_PASSWORD }}
 ```
