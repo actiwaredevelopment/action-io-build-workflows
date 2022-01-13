@@ -118,7 +118,6 @@ jobs:
           if [ ${{ inputs.branch }} != '' ]
           then
              git checkout ${{ inputs.branch }} -b latest
-             git pull
           fi
 
           mv ${{ inputs.dockerfile }} ./dockerfile
