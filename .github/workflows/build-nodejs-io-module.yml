@@ -1,4 +1,4 @@
-name: Build .net io module
+name: Build nodejs io module
 
 on:
   workflow_call:
@@ -8,11 +8,6 @@ on:
         required: true
         type: string
         default: ${{ github.repository }}
-      dotnet-version:  # id of input
-        description: 'The dotnet version that should be used for the build process.'
-        required: true
-        type: string
-        default: 6.0.x
       project:
         description: 'The project that should be build'
         required: true
@@ -33,26 +28,16 @@ on:
         required: false
         type: string
         default: './module-definition/info.json'
-      ui-build-path:
-        description: 'Enter where to find the ui (HTML) build.'
+      build-path:
+        description: 'Enter where to find the build output.'
         required: false
         type: string
-        default: './src/configuration/build'
+        default: './dist-nodejs'
       dockerfile:
         description: 'The name of the docker file that should be added to the download'
         required: false
         type: string
         default: './.github/docker/dockerfile'
-      create-single-file:
-        description: 'Indicates if the dotnet module should be created as a single file'
-        required: false
-        type: boolean
-        default: false
-      rid: 
-        description: 'Specification of the RID for Windows (win-x64, win-x86, win-arm, win-arm64) or Linux (linux-x64, linux-musl-x64, linux-arm, linux-arm64) or MacOS (osx-x64)'
-        required: false
-        type: string
-        default: 'linux-x64'
       artifact-name:
         description: 'The name of the artifact'
         required: false
@@ -125,42 +110,22 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -a
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: ${{ inputs.dotnet-version }}
-
-      - name: Ensure GitHub NuGet Source
-        run: |
-          dotnet nuget add source -u ${{ secrets.action-user }} -p ${{ secrets.action-token }} --store-password-in-clear-text --name github ${{ secrets.awdev-nuget-source }}
-
       - name: Create npmrc
         run: |
           echo "${{ secrets.npmrc-config }}" > .npmrc
 
-      - name: Restore dependencies
-        run: dotnet restore ${{ inputs.project }}
+      - name: 'Selecting the service directory'
+        run: cd ${{ inputs.project }}
 
-      # - name: Build
-      #   run: dotnet build ${{ inputs.project }} --configuration Release --force
+      - name: 'Install dependencies'
+        run: yarn
 
-      - name: Build and publish single file
-        if: ${{ inputs.create-single-file == true }} 
-        run: |
-          dotnet publish ${{ inputs.project }} -c Release -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true --self-contained true -o out --force
+      - name: 'Build'
+        run: yarn run build
         env:
           npm_config_userconfig: '${{ github.workspace }}/.npmrc'
           npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
-          NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
-
-      - name: Build and publish
-        if: ${{ inputs.create-single-file == false }} 
-        run: |
-          dotnet publish ${{ inputs.project }} -c Release -r ${{ inputs.rid }} -o out --force
-        env:
-          npm_config_userconfig: '${{ github.workspace }}/.npmrc'
-          npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
-          NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
+          NODE_AUTH_TOKEN: ${{ secrets.AWDEV_NPM_PACKAGE_TOKEN }}
 
       - name: 'Create module definition file'
         uses: vimtor/action-zip@v1
@@ -186,10 +151,9 @@ jobs:
           echo "::group::Added files to artifact"
           echo "${{ github.workspace }}/${{ inputs.modulefile }}"
           echo "${{ inputs.module-info-json }}"
-          echo "${{ inputs.ui-build-path }}"
+          echo "${{ inputs.build-path }}"
           echo "./dockerfile"
           echo "./version.txt"
-          echo "./out"
           echo "::endgroup::"
 
       - name: 'Upload the Publish Artifact'
@@ -199,8 +163,7 @@ jobs:
           path: |
             ${{ github.workspace }}/${{ inputs.modulefile }}
             ${{ inputs.module-info-json }}
-            ${{ inputs.ui-build-path }}
+            ${{ inputs.build-path }}
             ./dockerfile
             ./version.txt
-            ./out
           retention-days: 1
