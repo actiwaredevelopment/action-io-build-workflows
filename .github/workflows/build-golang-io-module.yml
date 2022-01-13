@@ -141,12 +141,10 @@ jobs:
         run: |
           git config --global url."https://{{ secrets.action-user }}:${{ secrets.action-token }}@github.com/".insteadOf "https://github.com/"
 
-      - name: 'Selecting the service directory'
-        if: ${{ inputs.go-mod-path != '' }}
-        run: cd ${{ inputs.go-mod-path }}
-
       - name: Build
-        run: CGO_ENABLED=0 GOOS=${{ inputs.go-os }} GOARCH=${{ inputs.go-arch }} go build -v -o ${{ inputs.outputfile }} ${{ inputs.mainfile }}
+        run: |
+          cd ${{ inputs.go-mod-path }}
+          CGO_ENABLED=0 GOOS=${{ inputs.go-os }} GOARCH=${{ inputs.go-arch }} go build -v -o ${{ inputs.outputfile }} ${{ inputs.mainfile }}
         env:
           npm_config_userconfig: '${{ github.workspace }}/.npmrc'
           npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
