@@ -141,10 +141,10 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore ${{ inputs.project }}
 
-      - name: Build
-        run: dotnet build ${{ inputs.project }} --configuration Release --force
+      # - name: Build
+      #   run: dotnet build ${{ inputs.project }} --configuration Release --force
 
-      - name: Publish single file
+      - name: Build and publish single file
         if: ${{ inputs.create-single-file }} == 'true'
         run: |
           dotnet publish ${{ inputs.project }} -c Release -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true --self-contained true -o out --force
@@ -153,7 +153,7 @@ jobs:
           npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
           NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
 
-      - name: Publish
+      - name: Build and publish
         if: ${{ inputs.create-single-file }} == 'false'
         run: |
           dotnet publish ${{ inputs.project }} -c Release -r ${{ inputs.rid }} -o out --force
