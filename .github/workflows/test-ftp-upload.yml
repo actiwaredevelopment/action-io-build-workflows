@@ -22,13 +22,14 @@ jobs:
             ./version.txt
           retention-days: 1
 
-      - name: Upload via ftp
-        uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/publish-to-ftp.yml@main
-        with:
-          artifact: ${{ needs.build.outputs.download }}
-          remote-dir: /Development/actiwareio/Source/Modules/v2/Template/
-        secrets:
-          host: ${{ secrets.SFTP_HOST }}
-          port: 522
-          user: ${{ secrets.SFTP_USER }}
-          password: ${{ secrets.SFTP_PASSWORD }}
+  ftp:
+    needs: build
+    uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/publish-to-ftp.yml@main
+    with:
+      artifact: ${{ needs.build.outputs.download }}
+      remote-dir: /Development/actiwareio/Source/Modules/v2/Template/
+    secrets:
+      host: ${{ secrets.SFTP_HOST }}
+      port: 522
+      user: ${{ secrets.SFTP_USER }}
+      password: ${{ secrets.SFTP_PASSWORD }}
