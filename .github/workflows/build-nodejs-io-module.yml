@@ -109,7 +109,7 @@ jobs:
 
       - name: Create npmrc
         run: |
-          echo "${{ secrets.NPMRC_CONFIG }}" > .npmrc
+          echo "${{ secrets.npmrc-config }}" > .npmrc
 
       - name: Inject insteadOf configuration
         run: |
