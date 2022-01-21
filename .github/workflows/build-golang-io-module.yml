@@ -120,7 +120,14 @@ jobs:
 
           if [ ${{ inputs.branch }} != '' ]
           then
-             git checkout -b latest ${{ inputs.branch }}
+            if [ ${{ inputs.branch }} == 'tags*' ]
+            then
+              git checkout ${{ inputs.branch }} -b latest
+            else
+              git checkout ${{ inputs.branch }}
+            fi
+
+            git pull
           fi
 
           mv ${{ inputs.dockerfile }} ./dockerfile
