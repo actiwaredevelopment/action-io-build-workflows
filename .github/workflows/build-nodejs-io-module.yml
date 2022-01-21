@@ -99,7 +99,7 @@ jobs:
 
           if [ ${{ inputs.branch }} != '' ]
           then
-             git checkout ${{ inputs.branch }} -b latest
+             git checkout -b latest ${{ inputs.branch }}
           fi
 
           mv ${{ inputs.dockerfile }} ./dockerfile
