@@ -114,13 +114,24 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -a
 
+      - uses: actions/setup-node@v2
+        with:
+            always-auth: true
+            registry-url: "https://npm.pkg.github.com"
+            token: ${{ secrets.action-token }}
+            scope: "@actiwaredevelopment"
+
       - name: Create npmrc
         run: |
           echo "${{ secrets.npmrc-config }}" > .npmrc
 
       - name: Inject insteadOf configuration
         run: |
-            git config --global url."https://{{ secrets.action }}:${{ secrets.GH_ACTION_TOKEN }}@github.com/".insteadOf "https://github.com/"
+            git config --global url."https://{{ secrets.action-user }}:${{ secrets.action-token }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Create npmrc
+        run: |
+          echo "${{ secrets.npmrc-config }}" > .npmrc
 
       - name: 'Selecting the service directory'
         run: cd ${{ inputs.project }}
