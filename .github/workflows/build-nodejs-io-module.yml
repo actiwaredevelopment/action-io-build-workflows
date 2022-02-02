@@ -133,7 +133,7 @@ jobs:
         env:
           npm_config_userconfig: '${{ github.workspace }}/.npmrc'
           npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
-          NODE_AUTH_TOKEN: ${{ secrets.AWDEV_NPM_PACKAGE_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
 
       - name: 'Create module definition file'
         uses: vimtor/action-zip@v1
