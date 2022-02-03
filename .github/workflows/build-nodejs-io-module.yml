@@ -38,6 +38,11 @@ on:
                 required: false
                 type: string
                 default: './dist-nodejs'
+            build-ui-path:
+                description: 'Enter where to find the build output.'
+                required: false
+                type: string
+                default: './dist'
             dockerfile:
                 description: 'The name of the docker file that should be added to the download'
                 required: false
@@ -183,6 +188,7 @@ jobs:
                   echo "${{ github.workspace }}/${{ inputs.modulefile }}"
                   echo "${{ inputs.module-info-json }}"
                   echo "${{ inputs.build-path }}"
+                  echo "${{ inputs.build-ui-path }}"
                   echo "./dockerfile"
                   echo "./version.txt"
                   echo "::endgroup::"
@@ -195,6 +201,7 @@ jobs:
                       ${{ github.workspace }}/${{ inputs.modulefile }}
                       ${{ inputs.module-info-json }}
                       ${{ inputs.build-path }}
+                      ${{ inputs.build-ui-path }}
                       ./dockerfile
                       ./version.txt
                   retention-days: 1
