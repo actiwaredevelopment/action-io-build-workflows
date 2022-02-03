@@ -120,6 +120,7 @@ jobs:
                   fi
 
                   mv ${{ inputs.dockerfile }} ./dockerfile
+                  cp ${{ inputs.project }}/package.json ./package.json
 
             - name: Display structure of downloaded files
               run: ls -a
@@ -202,6 +203,7 @@ jobs:
                       ${{ inputs.module-info-json }}
                       ${{ inputs.build-path }}
                       ${{ inputs.build-ui-path }}
+                      ./package.json
                       ./dockerfile
                       ./version.txt
                   retention-days: 1

@@ -5,7 +5,7 @@ In this repository workflows are offered, which can be used to build the project
 ### Build windows
 ```yml
 jobs:
-  build-windows:
+  build:
     uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/build-dotnet-io-module.yml@main
     with:
       repository: ${{ github.repository }}
@@ -26,20 +26,20 @@ jobs:
 
   use-download:
     name: Use download
-    needs: build-windows
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
     - name: 'Download Artifact'
       uses: actions/download-artifact@v2.0.8
       with: 
-        name: ${{ needs.build-windows.outputs.downloads }}
+        name: ${{ needs.build.outputs.downloads }}
 ```
 
 ### Build linux
 ```yml
 jobs:
-  build-linux:
+  build:
     uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/build-dotnet-io-module.yml@main
     with:
       repository: ${{ github.repository }}
@@ -60,7 +60,7 @@ jobs:
 
   use-download:
     name: Use download
-    needs: build-linux
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
@@ -73,7 +73,7 @@ jobs:
 ### Build macos
 ```yml
 jobs:
-  build-macos:
+  build:
     uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/build-dotnet-io-module.yml@main
     with:
       repository: ${{ github.repository }}
@@ -94,29 +94,31 @@ jobs:
 
   use-download:
     name: Use download
-    needs: build-macos
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
     - name: 'Download Artifact'
       uses: actions/download-artifact@v2.0.8
       with: 
-        name: ${{ needs.build-windows.outputs.downloads }}
+        name: ${{ needs.build.outputs.downloads }}
 ```
 
 ## Build workflows for nodejs IO Modules
 ### Build
 ```yml
 jobs:
-  build-nodejs:
+  build:
     uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/build-nodejs-io-module.yml@main
     with:
       repository: ${{ github.repository }}
       branch: ${{ github.ref_name }}
       project: src/service-v2-nodejs
+      ui-project: src/configuration
       modulefile: 'module.zip'
       dockerfile: './.github/docker/dockerfile-nodejs'
       build-path: './dist-nodejs'
+      build-ui-path: './dist'
     secrets:
       action-user: ${{ secrets.GH_ACTION_USER }}
       action-token: ${{ secrets.GH_ACTION_TOKEN }}
@@ -126,21 +128,21 @@ jobs:
 
   use-download:
     name: Use download
-    needs: build-nodejs
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
     - name: 'Download Artifact'
       uses: actions/download-artifact@v2.0.8
       with: 
-        name: ${{ needs.build-nodejs.outputs.downloads }}
+        name: ${{ needs.build.outputs.downloads }}
 ```
 
 ## Build workflows for golang IO Modules
 ### Build for linux
 ```yml
 jobs:
-  build-nodejs:
+  build:
     uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/build-golang-io-module.yml@main
     with:
       repository: ${{ github.repository }}
@@ -148,7 +150,7 @@ jobs:
       mainfile: src/service-v2-go/cmd/service/main.go
       outputfile: io-module-service
       modulefile: 'module.zip'
-      dockerfile: './.github/docker/dockerfile-nodejs'
+      dockerfile: './.github/docker/dockerfile-go'
       go-os: 'linux'
       go-arch: 'amd64'
     secrets:
@@ -160,7 +162,7 @@ jobs:
 
   use-download:
     name: Use download
-    needs: build-nodejs
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
@@ -173,7 +175,7 @@ jobs:
 ### Build for windows
 ```yml
 jobs:
-  build-nodejs:
+  build:
     uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/build-golang-io-module.yml@main
     with:
       repository: ${{ github.repository }}
@@ -181,7 +183,7 @@ jobs:
       mainfile: src/service-v2-go/cmd/service/main.go
       outputfile: io-module-service
       modulefile: 'module.zip'
-      dockerfile: './.github/docker/dockerfile-nodejs'
+      dockerfile: './.github/docker/dockerfile-go'
       go-os: 'windows'
       go-arch: 'amd64'
     secrets:
@@ -193,7 +195,7 @@ jobs:
 
   use-download:
     name: Use download
-    needs: build-nodejs
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
@@ -206,7 +208,7 @@ jobs:
 ### Build for macos (M1)
 ```yml
 jobs:
-  build-nodejs:
+  build:
     uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/build-golang-io-module.yml@main
     with:
       repository: ${{ github.repository }}
@@ -214,7 +216,7 @@ jobs:
       mainfile: src/service-v2-go/cmd/service/main.go
       outputfile: io-module-service
       modulefile: 'module.zip'
-      dockerfile: './.github/docker/dockerfile-nodejs'
+      dockerfile: './.github/docker/dockerfile-go'
       go-os: 'darwin'
       go-arch: 'arm64'
     secrets:
@@ -226,7 +228,7 @@ jobs:
 
   use-download:
     name: Use download
-    needs: build-nodejs
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
@@ -266,7 +268,7 @@ jobs:
 
     uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/publish-to-docker.yml@main
     with:
-      artifact: ${{ needs.build-windows.outputs.downloads }}
+      artifact: ${{ needs.build.outputs.downloads }}
       image-name: 'actiwareio/io-module-template'
       image-tag: 2-latest
     secrets:
@@ -303,7 +305,7 @@ jobs:
 
     uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/publish-to-github-docker.yml@main
     with:
-      artifact: ${{ needs.build-windows.outputs.downloads }}
+      artifact: ${{ needs.build.outputs.downloads }}
       image-name: io-module-template
       image-tag: developer
     secrets:
