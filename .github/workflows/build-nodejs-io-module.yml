@@ -147,8 +147,9 @@ jobs:
             - name: 'Install dependencies and build ui'
               run: |
                   cd ${{ inputs.ui-project }}
-                  yarn
-                  yarn run build
+                  npm
+                  npm run build
+                  npm prune --production
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
@@ -157,8 +158,9 @@ jobs:
             - name: 'Install dependencies and build service'
               run: |
                   cd ${{ inputs.project }}
-                  yarn
-                  yarn run build
+                  npm
+                  npm run build
+                  npm prune --production
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
@@ -189,6 +191,7 @@ jobs:
                   echo "${{ github.workspace }}/${{ inputs.modulefile }}"
                   echo "${{ inputs.module-info-json }}"
                   echo "${{ inputs.build-path }}"
+                  echo "${{ inputs.build-path }}/node_modules"
                   echo "${{ inputs.build-ui-path }}"
                   echo "./dockerfile"
                   echo "./version.txt"
@@ -202,6 +205,7 @@ jobs:
                       ${{ github.workspace }}/${{ inputs.modulefile }}
                       ${{ inputs.module-info-json }}
                       ${{ inputs.build-path }}
+                      ${{ inputs.build-path }}/node_modules
                       ${{ inputs.build-ui-path }}
                       ./package.json
                       ./dockerfile
