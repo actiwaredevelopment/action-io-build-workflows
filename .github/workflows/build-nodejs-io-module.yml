@@ -147,9 +147,8 @@ jobs:
             - name: 'Install dependencies and build ui'
               run: |
                   cd ${{ inputs.ui-project }}
-                  npm
-                  npm run build
-                  npm prune --production
+                  yarn
+                  yarn run build
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
