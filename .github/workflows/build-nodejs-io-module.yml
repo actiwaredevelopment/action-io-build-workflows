@@ -160,6 +160,7 @@ jobs:
                   npm install
                   npm run build
                   npm prune --production
+                  cp -avr node_modules ${{ inputs.build-path }}/node_modules
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
@@ -190,7 +191,6 @@ jobs:
                   echo "${{ github.workspace }}/${{ inputs.modulefile }}"
                   echo "${{ inputs.module-info-json }}"
                   echo "${{ inputs.build-path }}"
-                  echo "${{ inputs.build-path }}/node_modules"
                   echo "${{ inputs.build-ui-path }}"
                   echo "./dockerfile"
                   echo "./version.txt"
@@ -204,7 +204,6 @@ jobs:
                       ${{ github.workspace }}/${{ inputs.modulefile }}
                       ${{ inputs.module-info-json }}
                       ${{ inputs.build-path }}
-                      ${{ inputs.build-path }}/node_modules
                       ${{ inputs.build-ui-path }}
                       ./package.json
                       ./dockerfile
