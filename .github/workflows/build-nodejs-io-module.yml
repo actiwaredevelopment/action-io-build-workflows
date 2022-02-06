@@ -160,7 +160,6 @@ jobs:
                   npm install
                   npm run build
                   npm prune --production
-                  mv node_modules ${{ inputs.build-path }}
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
