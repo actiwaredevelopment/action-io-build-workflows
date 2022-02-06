@@ -157,7 +157,7 @@ jobs:
             - name: 'Install dependencies and build service'
               run: |
                   cd ${{ inputs.project }}
-                  npm
+                  npm install
                   npm run build
                   npm prune --production
               env:
