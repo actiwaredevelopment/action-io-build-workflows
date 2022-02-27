@@ -1,53 +1,57 @@
-name: "Build .NET desktop app"
+name: 'Build .NET desktop app'
 
 on:
-  workflow_call:
-    inputs:
-      sln-file:
-        description: "The location and file name of the solution"
-        required: true
-        type: string
-      build-config:
-        description: "The build configuration to use (default: Release)"
-        required: false
-        type: string
-        default: "Release"
-      artifact-name:
-        description: "The name of the artifact"
-        required: false
-        type: string
-        default: "DesktopBuildOutput"
-      artifact-files:
-        description: "The files to put into the artifact"
-        type: string
-        required: true
+    workflow_call:
+        inputs:
+            sln-file:
+                description: 'The location and file name of the solution'
+                required: true
+                type: string
+            build-config:
+                description: 'The build configuration to use (default: Release)'
+                required: false
+                type: string
+                default: 'Release'
+            artifact-name:
+                description: 'The name of the artifact'
+                required: false
+                type: string
+                default: 'DesktopBuildOutput'
+            artifact-files:
+                description: 'The files to put into the artifact'
+                type: string
+                required: true
 
 jobs:
-  build-desktop-ext:
-    name: Build desktop extension
-    runs-on: windows-2022
+    build-desktop-ext:
+        name: Build desktop extension
+        runs-on: windows-2022
 
-    outputs:
-      download: ${{ inputs.artifact-name }}
+        outputs:
+            download: ${{ inputs.artifact-name }}
 
-    steps:
-      - uses: actions/checkout@v1
-        name: Checkout Code
+        steps:
+            - uses: actions/checkout@v1
+              name: Checkout Code
 
-      - uses: nuget/setup-nuget@v1
-        name: Setup NuGet
-        with:
-          nuget-api-key: ${{ secrets.GH_ACTION_TOKEN }}
-          nuget-version: "5.x"
+            - uses: nuget/setup-nuget@v1
+              name: Setup NuGet
+              with:
+                  nuget-api-key: ${{ secrets.GH_ACTION_TOKEN }}
+                  nuget-version: '5.x'
 
-      - name: Restore NuGet Packages
-        run: nuget restore ${{ inputs.sln-file }}
+            - name: Ensure GitHub NuGet Source
+              run: |
+                  dotnet nuget add source -u ${{ secrets.GH_ACTION_USER }} -p ${{ secrets.GH_ACTION_TOKEN }} --store-password-in-clear-text --name github ${{ secrets.AWDEV_NUGET_URL }}
 
-      - name: Build desktop extension
-        run: '& "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\bin\MSBuild.exe" "${{ inputs.sln-file }}" /p:Configuration=${{ inputs.build-config }}'
+            - name: Restore NuGet Packages
+              run: nuget restore ${{ inputs.sln-file }}
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ inputs.artifact-name }}
-          path: ${{ inputs.artifact-files }}
+            - name: Build desktop extension
+              run: '& "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\bin\MSBuild.exe" "${{ inputs.sln-file }}" /p:Configuration=${{ inputs.build-config }}'
+
+            - name: Upload Artifact
+              uses: actions/upload-artifact@v2
+              with:
+                  name: ${{ inputs.artifact-name }}
+                  path: ${{ inputs.artifact-files }}
