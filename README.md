@@ -17,6 +17,10 @@ jobs:
         module-definition/functions/*
         module-definition/install/*
         module-definition/references/*
+    secrets:
+      action-user: ${{ secrets.GH_ACTION_USER }}
+      action-token: ${{ secrets.GH_ACTION_TOKEN }}
+      awdev-nuget-source: ${{ secrets.AWDEV_NUGET_URL }}
 ```
 
 ### Build windows

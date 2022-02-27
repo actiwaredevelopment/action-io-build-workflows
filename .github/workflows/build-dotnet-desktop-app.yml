@@ -22,6 +22,18 @@ on:
                 type: string
                 required: true
 
+        secrets:
+            action-user:
+                required: true
+            action-token:
+                required: true
+            awdev-nuget-source:
+                required: true
+            npm-package-token:
+                required: true
+            npmrc-config:
+                required: true
+
 jobs:
     build-desktop-ext:
         name: Build desktop extension
@@ -37,12 +49,13 @@ jobs:
             - uses: nuget/setup-nuget@v1
               name: Setup NuGet
               with:
-                  nuget-api-key: ${{ secrets.GH_ACTION_TOKEN }}
+                  nuget-api-key: ${{ secrets.action-token }}
                   nuget-version: '5.x'
 
             - name: Ensure GitHub NuGet Source
+              if: ${{ secrets.action-user != '' && secrets.awdev-nuget-source != '' }}
               run: |
-                  dotnet nuget add source -u ${{ secrets.GH_ACTION_USER }} -p ${{ secrets.GH_ACTION_TOKEN }} --store-password-in-clear-text --name github ${{ secrets.AWDEV_NUGET_URL }}
+                  dotnet nuget add source -u ${{ secrets.action-user }} -p ${{ secrets.action-token }} --store-password-in-clear-text --name github ${{ secrets.awdev-nuget-source }}
 
             - name: Restore NuGet Packages
               run: nuget restore ${{ inputs.sln-file }}
