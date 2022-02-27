@@ -29,10 +29,6 @@ on:
                 required: true
             awdev-nuget-source:
                 required: true
-            npm-package-token:
-                required: true
-            npmrc-config:
-                required: true
 
 jobs:
     build-desktop-ext:
@@ -53,7 +49,6 @@ jobs:
                   nuget-version: '5.x'
 
             - name: Ensure GitHub NuGet Source
-              if: ${{ secrets.action-user != '' && secrets.awdev-nuget-source != '' }}
               run: |
                   dotnet nuget add source -u ${{ secrets.action-user }} -p ${{ secrets.action-token }} --store-password-in-clear-text --name github ${{ secrets.awdev-nuget-source }}
 
