@@ -65,6 +65,10 @@ on:
                 default: ''
 
         secrets:
+            action-user:
+                required: true
+            action-token:
+                required: true
             aws-access-key:
                 required: true
             aws-secret-key:
