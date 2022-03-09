@@ -232,6 +232,7 @@ jobs:
                       ${{ github.workspace }}/${{ inputs.modulefile }}
                       ${{ inputs.module-info-json }}
                       ${{ inputs.ui-build-path }}
+                      ./module-definition/languages
                       ./dockerfile
                       ./version.txt
                       ./out
