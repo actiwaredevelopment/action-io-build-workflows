@@ -58,6 +58,11 @@ on:
                 required: true
                 type: string
                 default: ''
+            module-definition-file:
+                description: 'The info.json file to determine the module version'
+                required: false
+                type: string
+                default: 'module-definition/info.json'
 
         secrets:
             aip-license:
@@ -91,13 +96,13 @@ jobs:
               run: echo ${{steps.download.outputs.download-path}}
 
             - name: Display structure of downloaded files
-              run: dir
+              run: dir /B /S
 
             - name: Get module version
               id: module-version
               uses: actiwaredevelopment/action-io-get-module-version@v0.3
               with:
-                  module-definition-file: '${{ github.workspace }}/src/setup/module-definition/info.json'
+                  module-definition-file: ${{ inputs.module-definition-file }}
                   fallback-version: '2.0.0'
                   alternative-major-version: ${{ inputs.major-version }}
                   alternative-minor-version: ${{ inputs.minor-version }}
