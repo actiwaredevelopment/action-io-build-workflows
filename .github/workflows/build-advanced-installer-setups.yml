@@ -133,7 +133,7 @@ jobs:
                   path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}.exe
 
     deploy-setups:
-        name: 'Deploy to S3 for ACTIWARE: Infosystems'
+        name: 'Deploy to S3'
         needs: [build-setup]
         runs-on: ubuntu-latest
 
