@@ -83,22 +83,6 @@ jobs:
             - name: Check out repository code
               uses: actions/checkout@v2
 
-            - name: Checkout repository
-              run: |
-                  git clone https://${{secrets.action-user}}:${{secrets.action-token}}@github.com/${{ inputs.repository }}.git .
-
-                  if [ ${{ inputs.branch }} != '' ]
-                  then
-                    if [ ${{ inputs.branch }} == 'tags*' ]
-                    then
-                      git checkout ${{ inputs.branch }} -b latest
-                    else
-                      git checkout ${{ inputs.branch }}
-                    fi
-
-                    git pull
-                  fi
-
             - name: 'Download Artifact'
               id: download
               uses: actions/download-artifact@v3

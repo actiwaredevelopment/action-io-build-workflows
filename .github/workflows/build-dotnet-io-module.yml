@@ -42,6 +42,16 @@ on:
                 required: false
                 type: string
                 default: './module-definition/info.json'
+            module-languages:
+                description: 'Enter where to find the language files for the module.'
+                required: false
+                type: string
+                default: './module-definition/languages'
+            module-aip-setup:
+                description: 'Enter where to find the advanced installer project for the module.'
+                required: false
+                type: string
+                default: 'src/setup/setup-module.aip'
             ui-build-path:
                 description: 'Enter where to find the ui (HTML) build.'
                 required: false
@@ -218,6 +228,8 @@ jobs:
                   echo "::group::Added files to artifact"
                   echo "${{ github.workspace }}/${{ inputs.modulefile }}"
                   echo "${{ inputs.module-info-json }}"
+                  echo "${{ inputs.module-languages }}"
+                  echo "${{ inputs.module-aip-setup }}"
                   echo "${{ inputs.ui-build-path }}"
                   echo "./dockerfile"
                   echo "./version.txt"
@@ -232,7 +244,8 @@ jobs:
                       ${{ github.workspace }}/${{ inputs.modulefile }}
                       ${{ inputs.module-info-json }}
                       ${{ inputs.ui-build-path }}
-                      ./module-definition/languages
+                      ${{ inputs.module-languages }}
+                      ${{ inputs.module-aip-setup }}
                       ./dockerfile
                       ./version.txt
                       ./out
