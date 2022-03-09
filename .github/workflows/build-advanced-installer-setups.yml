@@ -55,86 +55,87 @@ on:
             aws-secret-key:
                 required: true
 
-        build-setup:
-            name: 'Build Windows Setup'
-            runs-on: windows-latest
+jobs:
+    build-setup:
+        name: 'Build Windows Setup'
+        runs-on: windows-latest
 
-            steps:
-                - name: Check out repository code
-                  uses: actions/checkout@v2
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v2
 
-                - name: 'Download Artifact'
-                  id: download
-                  uses: actions/download-artifact@v3
-                  with:
-                      name: BuildOutputWindows
-                      path: ${{ github.workspace }}\src\setup
+            - name: 'Download Artifact'
+              id: download
+              uses: actions/download-artifact@v3
+              with:
+                  name: BuildOutputWindows
+                  path: ${{ github.workspace }}\src\setup
 
-                - name: 'Echo download path'
-                  run: echo ${{steps.download.outputs.download-path}}
+            - name: 'Echo download path'
+              run: echo ${{steps.download.outputs.download-path}}
 
-                - name: Get module version
-                  id: module-version
-                  uses: actiwaredevelopment/action-io-get-module-version@v0.3
-                  with:
-                      module-definition-file: '${{ github.workspace }}/src/setup/module-definition/info.json'
-                      fallback-version: '2.0.0'
-                      alternative-major-version: ${{ inputs.major-version }}
-                      alternative-minor-version: ${{ inputs.minor-version }}
+            - name: Get module version
+              id: module-version
+              uses: actiwaredevelopment/action-io-get-module-version@v0.3
+              with:
+                  module-definition-file: '${{ github.workspace }}/src/setup/module-definition/info.json'
+                  fallback-version: '2.0.0'
+                  alternative-major-version: ${{ inputs.major-version }}
+                  alternative-minor-version: ${{ inputs.minor-version }}
 
-                - name: Build AIP
-                  uses: caphyon/advinst-github-action@v1.0
-                  with:
-                      advinst-version: '19.2'
-                      advinst-license: ${{ secrets.ADVANCED_INSTALLER_LICENSE_KEY }}
-                      advinst-enable-automation: 'true'
-                      aip-path: ${{ inputs.aip-file }}
-                      aip-build-name: Release
-                      aip-package-name: ${{ inputs.setup-name }}
-                      aip-output-dir: ${{ github.workspace }}\out-setup
-                      aip-commands: |
-                          SetProperty Manufacturer="${{ inputs.manufacture }}"
-                          SetProperty OemBranding="${{ inputs.branding }}"
-                          SetProperty OemMajorRelease="${{ inputs.setup-name }}"
-                          SetProperty ServiceName="${{ inputs.service-name }}"
-                          SetProperty SetupName="${{ inputs.setup-name }}"
-                          SetVersion ${{ steps.module-version.outputs.version }}
+            - name: Build AIP
+              uses: caphyon/advinst-github-action@v1.0
+              with:
+                  advinst-version: '19.2'
+                  advinst-license: ${{ secrets.ADVANCED_INSTALLER_LICENSE_KEY }}
+                  advinst-enable-automation: 'true'
+                  aip-path: ${{ inputs.aip-file }}
+                  aip-build-name: Release
+                  aip-package-name: ${{ inputs.setup-name }}
+                  aip-output-dir: ${{ github.workspace }}\out-setup
+                  aip-commands: |
+                      SetProperty Manufacturer="${{ inputs.manufacture }}"
+                      SetProperty OemBranding="${{ inputs.branding }}"
+                      SetProperty OemMajorRelease="${{ inputs.setup-name }}"
+                      SetProperty ServiceName="${{ inputs.service-name }}"
+                      SetProperty SetupName="${{ inputs.setup-name }}"
+                      SetVersion ${{ steps.module-version.outputs.version }}
 
-                - name: Publish setup artifact
-                  uses: actions/upload-artifact@v2
-                  with:
-                      name: Setup
-                      path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}
+            - name: Publish setup artifact
+              uses: actions/upload-artifact@v2
+              with:
+                  name: Setup
+                  path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}
 
-        deploy-setups:
-            name: 'Deploy to S3 for ACTIWARE: Infosystems'
-            needs: [build-setup]
-            runs-on: ubuntu-latest
+    deploy-setups:
+        name: 'Deploy to S3 for ACTIWARE: Infosystems'
+        needs: [build-setup]
+        runs-on: ubuntu-latest
 
-            steps:
-                - name: 'Download Artifact'
-                  id: download-setup
-                  uses: actions/download-artifact@v2.0.8
-                  with:
-                      name: Setup
+        steps:
+            - name: 'Download Artifact'
+              id: download-setup
+              uses: actions/download-artifact@v2.0.8
+              with:
+                  name: Setup
 
-                - name: 'Configure AWS Credentials'
-                  uses: aws-actions/configure-aws-credentials@v1
-                  with:
-                      aws-region: eu-central-1
-                      # AWS Access Key ID. This input is required if running in the GitHub hosted environment. It is optional if running in a self-hosted environment that already has AWS credentials, for example on an EC2 instance.
-                      aws-access-key-id: ${{ secrets.aws-access-key }}
-                      # AWS Secret Access Key. This input is required if running in the GitHub hosted environment. It is optional if running in a self-hosted environment that already has AWS credentials, for example on an EC2 instance.
-                      aws-secret-access-key: ${{ secrets.aws-secret-key }}
+            - name: 'Configure AWS Credentials'
+              uses: aws-actions/configure-aws-credentials@v1
+              with:
+                  aws-region: eu-central-1
+                  # AWS Access Key ID. This input is required if running in the GitHub hosted environment. It is optional if running in a self-hosted environment that already has AWS credentials, for example on an EC2 instance.
+                  aws-access-key-id: ${{ secrets.aws-access-key }}
+                  # AWS Secret Access Key. This input is required if running in the GitHub hosted environment. It is optional if running in a self-hosted environment that already has AWS credentials, for example on an EC2 instance.
+                  aws-secret-access-key: ${{ secrets.aws-secret-key }}
 
-                - name: 'Upload files'
-                  uses: oneyedev/aws-deploy-s3@v2
-                  with:
-                      # AWS Region of S3 Bucket
-                      region: eu-central-1
-                      # Name of S3 Bucket
-                      bucket: actiware-setups
-                      # A Local Source Directory to Upload
-                      source: ${{ steps.download-setup.outputs.download-path }}
-                      # A Remote Target Directory to Upload
-                      target: '${{ inputs.publish-target }}'
+            - name: 'Upload files'
+              uses: oneyedev/aws-deploy-s3@v2
+              with:
+                  # AWS Region of S3 Bucket
+                  region: eu-central-1
+                  # Name of S3 Bucket
+                  bucket: actiware-setups
+                  # A Local Source Directory to Upload
+                  source: ${{ steps.download-setup.outputs.download-path }}
+                  # A Remote Target Directory to Upload
+                  target: '${{ inputs.publish-target }}'
