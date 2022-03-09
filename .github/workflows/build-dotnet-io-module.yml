@@ -191,7 +191,7 @@ jobs:
             - name: Build and publish
               if: ${{ inputs.create-single-file == false }}
               run: |
-                  dotnet publish ${{ inputs.project }} -c Release -r ${{ inputs.rid }} -o out --force
+                  dotnet publish ${{ inputs.project }} -c Release -r ${{ inputs.rid }} --self-contained false -o out --force
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
