@@ -99,8 +99,6 @@ jobs:
                     git pull
                   fi
 
-                  mv ${{ inputs.dockerfile }} ./dockerfile
-
             - name: 'Download Artifact'
               id: download
               uses: actions/download-artifact@v3
