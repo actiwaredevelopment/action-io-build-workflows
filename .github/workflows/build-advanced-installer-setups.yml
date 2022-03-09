@@ -3,16 +3,6 @@ name: 'Build setups for modules (Advanced Installer)'
 on:
     workflow_call:
         inputs:
-            repository: # id of input
-                description: 'The repository of the io module'
-                required: true
-                type: string
-                default: ${{ github.repository }}
-            branch:
-                description: 'The name of the branch that should be checkout'
-                required: false
-                type: string
-                default: ''
             artifact: # id of input
                 description: 'The name of the artifact of the build output'
                 required: true
@@ -55,6 +45,11 @@ on:
                 default: ''
             setup-name:
                 description: 'The name of setup file'
+                required: true
+                type: string
+                default: ''
+            artifact-setup:
+                description: 'The name of setup artifact file'
                 required: true
                 type: string
                 default: ''
@@ -129,7 +124,7 @@ jobs:
             - name: Publish setup artifact
               uses: actions/upload-artifact@v2
               with:
-                  name: Setup
+                  name: ${{ inputs.artifact-setup }}
                   path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}.exe
 
     deploy-setups:
@@ -142,7 +137,7 @@ jobs:
               id: download-setup
               uses: actions/download-artifact@v2.0.8
               with:
-                  name: Setup
+                  name: ${{ inputs.artifact-setup }}
 
             - name: 'Configure AWS Credentials'
               uses: aws-actions/configure-aws-credentials@v1
