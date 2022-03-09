@@ -3,6 +3,16 @@ name: Build setups for modules (Advanced Installer)
 on:
     workflow_call:
         inputs:
+            repository: # id of input
+                description: 'The repository of the io module'
+                required: true
+                type: string
+                default: ${{ github.repository }}
+            branch:
+                description: 'The name of the branch that should be checkout'
+                required: false
+                type: string
+                default: ''
             artifact: # id of input
                 description: 'The name of the artifact'
                 required: true
@@ -18,6 +28,11 @@ on:
                 required: false
                 type: string
                 default: 'ACTIWARE Development GmbH'
+            partner:
+                description: 'The name of the branch that should be checkout'
+                required: false
+                type: string
+                default: 'ACTIWARE'
             branding:
                 description: 'The name of the tag for the docker image'
                 required: false
@@ -32,7 +47,7 @@ on:
                 description: 'The name of the tag for the docker image'
                 required: false
                 type: string
-                default: '2'
+                default: ''
             service-name:
                 description: 'The name of the tag for the docker image'
                 required: required
@@ -64,6 +79,24 @@ jobs:
             - name: Check out repository code
               uses: actions/checkout@v2
 
+            - name: Checkout repository
+              run: |
+                  git clone https://${{secrets.action-user}}:${{secrets.action-token}}@github.com/${{ inputs.repository }}.git .
+
+                  if [ ${{ inputs.branch }} != '' ]
+                  then
+                    if [ ${{ inputs.branch }} == 'tags*' ]
+                    then
+                      git checkout ${{ inputs.branch }} -b latest
+                    else
+                      git checkout ${{ inputs.branch }}
+                    fi
+
+                    git pull
+                  fi
+
+                  mv ${{ inputs.dockerfile }} ./dockerfile
+
             - name: 'Download Artifact'
               id: download
               uses: actions/download-artifact@v3
@@ -73,6 +106,9 @@ jobs:
 
             - name: 'Echo download path'
               run: echo ${{steps.download.outputs.download-path}}
+
+            - name: Display structure of downloaded files
+              run: ls -a
 
             - name: Get module version
               id: module-version
@@ -91,10 +127,11 @@ jobs:
                   advinst-enable-automation: 'true'
                   aip-path: ${{ inputs.aip-file }}
                   aip-build-name: Release
-                  aip-package-name: ${{ inputs.setup-name }}
+                  aip-package-name: ${{ inputs.setup-name }}.exe
                   aip-output-dir: ${{ github.workspace }}\out-setup
                   aip-commands: |
                       SetProperty Manufacturer="${{ inputs.manufacture }}"
+                      SetProperty OemPartner="${{ inputs.partner }}"
                       SetProperty OemBranding="${{ inputs.branding }}"
                       SetProperty OemMajorRelease="${{ inputs.setup-name }}"
                       SetProperty ServiceName="${{ inputs.service-name }}"
@@ -105,7 +142,7 @@ jobs:
               uses: actions/upload-artifact@v2
               with:
                   name: Setup
-                  path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}
+                  path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}.exe
 
     deploy-setups:
         name: 'Deploy to S3 for ACTIWARE: Infosystems'
