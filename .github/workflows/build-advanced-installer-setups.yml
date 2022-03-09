@@ -65,6 +65,8 @@ on:
                 default: ''
 
         secrets:
+            aip-license:
+                required: true
             action-user:
                 required: true
             action-token:
@@ -109,7 +111,7 @@ jobs:
               uses: caphyon/advinst-github-action@v1.0
               with:
                   advinst-version: '19.2'
-                  advinst-license: ${{ secrets.ADVANCED_INSTALLER_LICENSE_KEY }}
+                  advinst-license: ${{ secrets.aip-license }}
                   advinst-enable-automation: 'true'
                   aip-path: ${{ inputs.aip-file }}
                   aip-build-name: Release
