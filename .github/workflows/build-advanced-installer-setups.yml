@@ -1,4 +1,4 @@
-name: Build setups for modules (Advanced Installer)
+name: 'Build setups for modules (Advanced Installer)'
 
 on:
     workflow_call:
@@ -14,52 +14,52 @@ on:
                 type: string
                 default: ''
             artifact: # id of input
-                description: 'The name of the artifact'
+                description: 'The name of the artifact of the build output'
                 required: true
                 type: string
                 default: ''
             aip-file: # id of input
-                description: 'The name of the artifact'
+                description: 'The destination of the advanced installer project'
                 required: false
                 type: string
                 default: 'src/setup/setup-module.aip'
             manufacture:
-                description: 'The name of the docker image'
+                description: 'Product manufacturer'
                 required: false
                 type: string
                 default: 'ACTIWARE Development GmbH'
             partner:
-                description: 'The name of the branch that should be checkout'
+                description: 'Name of the partner'
                 required: false
                 type: string
                 default: 'ACTIWARE'
             branding:
-                description: 'The name of the tag for the docker image'
+                description: 'Product branding'
                 required: false
                 type: string
                 default: 'IO'
             major-version:
-                description: 'The name of the tag for the docker image'
+                description: 'The major version of the product'
                 required: false
                 type: string
                 default: '2'
             minor-version:
-                description: 'The name of the tag for the docker image'
+                description: 'The minor version of the product'
                 required: false
                 type: string
                 default: ''
             service-name:
-                description: 'The name of the tag for the docker image'
+                description: 'The name of the windows service'
                 required: required
                 type: string
                 default: ''
             setup-name:
-                description: 'The name of the tag for the docker image'
+                description: 'The name of setup file'
                 required: true
                 type: string
                 default: ''
             publish-target:
-                description: 'The name of the tag for the docker image'
+                description: 'The s3 target for the bucket'
                 required: true
                 type: string
                 default: ''
