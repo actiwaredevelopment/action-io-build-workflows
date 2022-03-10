@@ -121,7 +121,7 @@ jobs:
                       SetProperty Manufacturer="${{ inputs.manufacture }}"
                       SetProperty OemPartner="${{ inputs.partner }}"
                       SetProperty OemBranding="${{ inputs.branding }}"
-                      SetProperty OemMajorRelease="${{ inputs.setup-name }}"
+                      SetProperty OemMajorRelease="${{ inputs.major-version }}"
                       SetProperty ServiceName="${{ inputs.service-name }}"
                       SetProperty SetupName="${{ inputs.setup-name }}"
                       SetVersion ${{ steps.module-version.outputs.version }}
