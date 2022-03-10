@@ -164,6 +164,12 @@ jobs:
               run: |
                   echo "${{ secrets.npmrc-config }}" > .npmrc
 
+            - name: Get module version
+              id: module-version
+              uses: actiwaredevelopment/action-io-get-module-version@v0.1
+              with:
+                  module-definition-file: ${{ inputs.module-info-json }}
+
             - name: Restore dependencies
               run: dotnet restore ${{ inputs.project }}
 
@@ -173,7 +179,7 @@ jobs:
             - name: Build and publish single file
               if: ${{ inputs.create-single-file == true && inputs.dotnet-version != '6.0.x' }}
               run: |
-                  dotnet publish ${{ inputs.project }} -c Release -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true --self-contained true -o out --force
+                  dotnet publish ${{ inputs.project }} -c Release -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:Version=${{ steps.module-version.outputs.version }} --self-contained true -o out --force
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
@@ -182,7 +188,7 @@ jobs:
             - name: Build and publish single file
               if: ${{ inputs.create-single-file == true && inputs.dotnet-version == '6.0.x' }}
               run: |
-                  dotnet publish ${{ inputs.project }} -c Release -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:EnableCompressionInSingleFile=true --self-contained true -o out --force
+                  dotnet publish ${{ inputs.project }} -c Release -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:EnableCompressionInSingleFile=true -p:Version=${{ steps.module-version.outputs.version }} --self-contained true -o out --force
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
@@ -191,7 +197,7 @@ jobs:
             - name: Build and publish
               if: ${{ inputs.create-single-file == false }}
               run: |
-                  dotnet publish ${{ inputs.project }} -c Release -r ${{ inputs.rid }} --self-contained false -o out --force
+                  dotnet publish ${{ inputs.project }} -c Release -r ${{ inputs.rid }} -p:Version=${{ steps.module-version.outputs.version }} --self-contained false -o out --force
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
@@ -210,12 +216,6 @@ jobs:
                   dest: ${{ inputs.modulefile }}
                   files: ${{ inputs.module-source-path }}
                   recursive: true
-
-            - name: Get module version
-              id: module-version
-              uses: actiwaredevelopment/action-io-get-module-version@v0.1
-              with:
-                  module-definition-file: ${{ inputs.module-info-json }}
 
             - name: 'Create version information'
               uses: finnp/create-file-action@master
