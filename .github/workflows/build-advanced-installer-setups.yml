@@ -89,7 +89,7 @@ jobs:
               id: download
               uses: actions/download-artifact@v3
               with:
-                  name: BuildOutputWindows
+                  name: ${{ inputs.artifact }}
                   path: ${{ github.workspace }}\src\setup
 
             - name: 'Echo download path'
