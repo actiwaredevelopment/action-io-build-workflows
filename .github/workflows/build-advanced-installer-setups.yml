@@ -96,8 +96,7 @@ jobs:
               run: echo ${{steps.download.outputs.download-path}}
 
             - name: Display structure of downloaded files
-              run: |
-                "& dir /S"
+              run: "dir /S"
 
             - name: Get module version
               id: module-version
