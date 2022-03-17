@@ -121,7 +121,7 @@ jobs:
                   advinst-enable-automation: 'true'
                   aip-path: ${{ inputs.aip-file }}
                   aip-build-name: Release
- 7                 aip-package-name: ${{ inputs.setup-name }}.exe
+                  aip-package-name: ${{ inputs.setup-name }}.exe
                   aip-output-dir: ${{ github.workspace }}\out-setup
                   aip-commands: |
                       SetProperty Manufacturer="${{ inputs.manufacture }}"
