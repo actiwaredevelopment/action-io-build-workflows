@@ -38,6 +38,11 @@ on:
                 required: false
                 type: string
                 default: ''
+            build-version:
+                description: 'The build version'
+                required: false
+                type: string
+                default: ''
             service-name:
                 description: 'The name of the windows service'
                 required: true
@@ -106,6 +111,7 @@ jobs:
                   fallback-version: '2.0.0'
                   alternative-major-version: ${{ inputs.major-version }}
                   alternative-minor-version: ${{ inputs.minor-version }}
+                  alternative-build-version: ${{ inputs.build-version }}
 
             - name: Build AIP
               uses: caphyon/advinst-github-action@v1.0
