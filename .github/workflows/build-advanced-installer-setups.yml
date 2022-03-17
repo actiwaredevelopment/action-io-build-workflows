@@ -121,7 +121,7 @@ jobs:
                   advinst-enable-automation: 'true'
                   aip-path: ${{ inputs.aip-file }}
                   aip-build-name: Release
-                  aip-package-name: ${{ inputs.setup-name }}.exe
+ 7                 aip-package-name: ${{ inputs.setup-name }}.exe
                   aip-output-dir: ${{ github.workspace }}\out-setup
                   aip-commands: |
                       SetProperty Manufacturer="${{ inputs.manufacture }}"
@@ -160,16 +160,16 @@ jobs:
                   aws-secret-access-key: ${{ secrets.aws-secret-key }}
 
             - name: 'Upload files'
-              uses: Reggionick/s3-deploy@v3.1.1
+              uses: actiwaredevelopment/aws-deploy-s3@v3
               with:
                   # AWS Region of S3 Bucket
-                  bucket-region: eu-central-1
+                  region: eu-central-1
                   # Name of S3 Bucket
                   bucket: actiware-setups
-                  delete-removed: false
                   # A Local Source Directory to Upload
                   source: ${{ steps.download-setup.outputs.download-path }}
                   # A Remote Target Directory to Upload
-                  invalidation: '${{ inputs.publish-target }}'
+                  target: '${{ inputs.publish-target }}'
+                  clear-target: 'false'
                   
                   
