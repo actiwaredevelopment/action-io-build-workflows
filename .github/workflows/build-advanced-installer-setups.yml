@@ -160,13 +160,16 @@ jobs:
                   aws-secret-access-key: ${{ secrets.aws-secret-key }}
 
             - name: 'Upload files'
-              uses: oneyedev/aws-deploy-s3@v2
+              uses: Reggionick/s3-deploy@v3.1.1
               with:
                   # AWS Region of S3 Bucket
-                  region: eu-central-1
+                  bucket-region: eu-central-1
                   # Name of S3 Bucket
                   bucket: actiware-setups
+                  delete-removed: false
                   # A Local Source Directory to Upload
                   source: ${{ steps.download-setup.outputs.download-path }}
                   # A Remote Target Directory to Upload
-                  target: '${{ inputs.publish-target }}'
+                  invalidation: '${{ inputs.publish-target }}'
+                  
+                  
