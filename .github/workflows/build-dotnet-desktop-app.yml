@@ -23,7 +23,7 @@ on:
                 required: true
             nuget-source:
                 description: 'Add additional nuget source'
-                trype: string
+                type: string
                 required: false
 
         secrets:
