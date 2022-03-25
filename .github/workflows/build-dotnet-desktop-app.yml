@@ -21,6 +21,10 @@ on:
                 description: 'The files to put into the artifact'
                 type: string
                 required: true
+            nuget-source:
+                description: 'Add additional nuget source'
+                trype: string
+                required: false
 
         secrets:
             action-user:
@@ -47,6 +51,11 @@ jobs:
               with:
                   nuget-api-key: ${{ secrets.action-token }}
                   nuget-version: '5.x'
+
+            - name: Additional NuGet Source
+              if: ${{ inputs.nuget-source != '' }}
+              run: |
+                  dotnet nuget add source -u ${{ secrets.action-user }} -p ${{ secrets.action-token }} --store-password-in-clear-text --name github ${{ inputs.nuget-source }}
 
             - name: Ensure GitHub NuGet Source
               run: |
