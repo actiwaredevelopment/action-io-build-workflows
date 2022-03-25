@@ -55,7 +55,7 @@ jobs:
             - name: Additional NuGet Source
               if: ${{ inputs.nuget-source != '' }}
               run: |
-                  dotnet nuget add source -u ${{ secrets.action-user }} -p ${{ secrets.action-token }} --store-password-in-clear-text --name github ${{ inputs.nuget-source }}
+                  dotnet nuget add source --name rebex ${{ inputs.nuget-source }}
 
             - name: Ensure GitHub NuGet Source
               run: |
