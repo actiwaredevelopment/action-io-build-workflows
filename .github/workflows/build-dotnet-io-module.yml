@@ -142,8 +142,6 @@ jobs:
                     else
                       git checkout ${{ inputs.branch }}
                     fi
-
-                    git pull
                   fi
 
                   mv ${{ inputs.dockerfile }} ./dockerfile
