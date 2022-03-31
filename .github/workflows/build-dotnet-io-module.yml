@@ -136,7 +136,7 @@ jobs:
 
                   if [ ${{ inputs.branch }} != '' ]
                   then
-                    if [ ${{ inputs.branch }} == 'tags*' ]
+                    if [[ ${{ inputs.branch }} == tags* ]]
                     then
                       git checkout ${{ inputs.branch }} -b latest
                     else
