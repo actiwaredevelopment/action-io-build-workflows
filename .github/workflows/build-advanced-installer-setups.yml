@@ -150,6 +150,16 @@ jobs:
               with:
                   name: ${{ inputs.artifact-setup }}
 
+            - name: Get module version
+              id: module-version
+              uses: actiwaredevelopment/action-io-get-module-version@v0.5
+              with:
+                  module-definition-file: ${{ inputs.module-definition-file }}
+                  fallback-version: '2.0.0'
+                  alternative-major-version: ${{ inputs.major-version }}
+                  alternative-minor-version: ${{ inputs.minor-version }}
+                  alternative-build-version: ${{ inputs.build-version }}
+
             - name: 'Configure AWS Credentials'
               uses: aws-actions/configure-aws-credentials@v1
               with:
@@ -160,7 +170,7 @@ jobs:
                   aws-secret-access-key: ${{ secrets.aws-secret-key }}
 
             - name: 'Upload files'
-              uses: actiwaredevelopment/aws-deploy-s3@v3
+              uses: actiwaredevelopment/aws-deploy-s3@v4
               with:
                   # AWS Region of S3 Bucket
                   region: eu-central-1
@@ -170,6 +180,5 @@ jobs:
                   source: ${{ steps.download-setup.outputs.download-path }}
                   # A Remote Target Directory to Upload
                   target: '${{ inputs.publish-target }}'
+                  tags: 'version=${{ steps.module-version.outputs.version }}'
                   clear-target: 'false'
-                  
-                  
