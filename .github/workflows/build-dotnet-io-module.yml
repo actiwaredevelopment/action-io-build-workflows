@@ -112,7 +112,7 @@ on:
 
 jobs:
     build:
-        name: build for ${{ inputs.rid }}
+        name: Build for ${{ inputs.rid }}
         runs-on: ubuntu-latest
 
         outputs:

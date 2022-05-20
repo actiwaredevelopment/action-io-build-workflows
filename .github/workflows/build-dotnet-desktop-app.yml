@@ -35,8 +35,8 @@ on:
                 required: true
 
 jobs:
-    build-desktop-ext:
-        name: Build desktop extension
+    build:
+        name: 'Build Desktop App'
         runs-on: windows-2022
 
         outputs:
