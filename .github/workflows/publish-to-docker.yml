@@ -3,11 +3,11 @@ name: Publish to docker hub
 on:
     workflow_call:
         inputs:
-            use-tar:
-                description: 'Indication if there is a TAR file in the artifact'
-                required: false
-                type: boolean
-                default: false
+            # use-tar:
+            #     description: 'Indication if there is a TAR file in the artifact'
+            #     required: false
+            #     type: boolean
+            #     default: false
             artifact: # id of input
                 description: 'The name of the artifact'
                 required: true
@@ -50,9 +50,9 @@ jobs:
               with:
                   name: ${{ inputs.artifact }}
 
-            - name: Unpack Artifact
-              if: ${{ inputs.use-tar }}
-              run: tar -xf ${{ inputs.artifact }}.tar
+            # - name: Unpack Artifact
+            #   if: ${{ inputs.use-tar }}
+            #   run: tar -xf ${{ inputs.artifact }}.tar
 
             - name: Display structure of downloaded files
               run: ls -R
