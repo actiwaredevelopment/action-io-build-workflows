@@ -13,6 +13,11 @@ on:
                 required: true
                 type: string
                 default: ''
+            branch:
+                description: 'The name of the branch that should be checkout'
+                required: false
+                type: string
+                default: ''
             artifact-name:
                 description: 'The name of the artifact'
                 required: false
@@ -45,8 +50,21 @@ jobs:
             download: ${{ inputs.artifact-name }}
 
         steps:
-            - uses: actions/checkout@v1
-              name: Checkout Code
+            - name: Checkout repository
+              run: |
+                  git clone https://${{secrets.action-user}}:${{secrets.action-token}}@github.com/${{ inputs.repository }}.git .
+
+                  if [ ${{ inputs.branch }} != '' ]
+                  then
+                    if [[ ${{ inputs.branch }} == tags* ]]
+                    then
+                      git checkout ${{ inputs.branch }} -b latest
+                    else
+                      git checkout ${{ inputs.branch }}
+                    fi
+                  fi
+
+                  mv ${{ inputs.dockerfile }} ./dockerfile
 
             - name: Setup .NET
               uses: actions/setup-dotnet@v1
@@ -61,19 +79,13 @@ jobs:
               run: |
                   echo "${{ secrets.npmrc-config }}" > .npmrc
 
-            - name: Get module version
-              id: module-version
-              uses: actiwaredevelopment/action-io-get-module-version@v0.1
-              with:
-                  module-definition-file: ${{ inputs.module-info-json }}
-
             - name: Restore dependencies
               run: dotnet restore ${{ inputs.project }}
 
             - name: Build and publish single file
               if: ${{ inputs.create-single-file == true && inputs.dotnet-version != '6.0.x' }}
               run: |
-                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:Version=${{ steps.module-version.outputs.version }} --self-contained true -o out --force
+                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true --self-contained true -o out --force
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
@@ -82,7 +94,7 @@ jobs:
             - name: Build and publish single file
               if: ${{ inputs.create-single-file == true && inputs.dotnet-version == '6.0.x' }}
               run: |
-                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:EnableCompressionInSingleFile=true -p:Version=${{ steps.module-version.outputs.version }} --self-contained true -o out --force
+                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:EnableCompressionInSingleFile=true --self-contained true -o out --force
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
@@ -91,7 +103,7 @@ jobs:
             - name: Build and publish
               if: ${{ inputs.create-single-file == false }}
               run: |
-                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:Version=${{ steps.module-version.outputs.version }} --self-contained false -o out --force
+                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} --self-contained false -o out --force
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
