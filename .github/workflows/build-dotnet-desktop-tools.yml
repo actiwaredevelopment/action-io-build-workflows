@@ -60,22 +60,6 @@ jobs:
               repository: ${{ inputs.repository }}
               ref: ${{ inputs.branch }}
 
-            - name:
-              run: |
-                  git clone https://${{secrets.action-user}}:${{secrets.action-token}}@github.com/${{ inputs.repository }}.git .
-
-                  if [ ${{ inputs.branch }} != '' ]
-                  then
-                    if [[ ${{ inputs.branch }} == tags* ]]
-                    then
-                      git checkout ${{ inputs.branch }} -b latest
-                    else
-                      git checkout ${{ inputs.branch }}
-                    fi
-                  fi
-
-                  mv ${{ inputs.dockerfile }} ./dockerfile
-
             - name: Setup .NET
               uses: actions/setup-dotnet@v1
               with:
