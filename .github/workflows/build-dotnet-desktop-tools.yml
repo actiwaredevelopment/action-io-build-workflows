@@ -33,6 +33,16 @@ on:
                 required: false
                 type: string
                 default: 'win-x64'
+            create-single-file:
+                description: 'Indicates if the dotnet module should be created as a single file'
+                required: false
+                type: boolean
+                default: false
+            dotnet-configuration:
+                description: 'For multiple configurations, the name of the configuration must be entered here. The default is Release'
+                required: false
+                type: string
+                default: 'Release'
 
         secrets:
             action-user:
