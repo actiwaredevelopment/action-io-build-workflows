@@ -1,0 +1,110 @@
+name: 'Build .NET desktop app'
+
+on:
+    workflow_call:
+        inputs:
+            dotnet-version: # id of input
+                description: 'The dotnet version that should be used for the build process.'
+                required: true
+                type: string
+                default: 6.0.x
+            project:
+                description: 'The project that should be build'
+                required: true
+                type: string
+                default: ''
+            artifact-name:
+                description: 'The name of the artifact'
+                required: false
+                type: string
+                default: 'DesktopBuildOutput'
+            artifact-files:
+                description: 'The files to put into the artifact'
+                type: string
+                required: true
+            rid:
+                description: 'Specification of the RID for Windows (win-x64, win-x86, win-arm, win-arm64) or Linux (linux-x64, linux-musl-x64, linux-arm, linux-arm64) or MacOS (osx-x64)'
+                required: false
+                type: string
+                default: 'win-x64'
+
+        secrets:
+            action-user:
+                required: true
+            action-token:
+                required: true
+            awdev-nuget-source:
+                required: true
+            npm-package-token:
+                required: true
+            npmrc-config:
+                required: true
+
+jobs:
+    build:
+        name: 'Build Desktop App'
+        runs-on: windows-2022
+
+        outputs:
+            download: ${{ inputs.artifact-name }}
+
+        steps:
+            - uses: actions/checkout@v1
+              name: Checkout Code
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v1
+              with:
+                  dotnet-version: ${{ inputs.dotnet-version }}
+
+            - name: Ensure GitHub NuGet Source
+              run: |
+                  dotnet nuget add source -u ${{ secrets.action-user }} -p ${{ secrets.action-token }} --store-password-in-clear-text --name github ${{ secrets.awdev-nuget-source }}
+
+            - name: Create npmrc
+              run: |
+                  echo "${{ secrets.npmrc-config }}" > .npmrc
+
+            - name: Get module version
+              id: module-version
+              uses: actiwaredevelopment/action-io-get-module-version@v0.1
+              with:
+                  module-definition-file: ${{ inputs.module-info-json }}
+
+            - name: Restore dependencies
+              run: dotnet restore ${{ inputs.project }}
+
+            - name: Build and publish single file
+              if: ${{ inputs.create-single-file == true && inputs.dotnet-version != '6.0.x' }}
+              run: |
+                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:Version=${{ steps.module-version.outputs.version }} --self-contained true -o out --force
+              env:
+                  npm_config_userconfig: '${{ github.workspace }}/.npmrc'
+                  npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
+                  NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
+
+            - name: Build and publish single file
+              if: ${{ inputs.create-single-file == true && inputs.dotnet-version == '6.0.x' }}
+              run: |
+                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:EnableCompressionInSingleFile=true -p:Version=${{ steps.module-version.outputs.version }} --self-contained true -o out --force
+              env:
+                  npm_config_userconfig: '${{ github.workspace }}/.npmrc'
+                  npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
+                  NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
+
+            - name: Build and publish
+              if: ${{ inputs.create-single-file == false }}
+              run: |
+                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:Version=${{ steps.module-version.outputs.version }} --self-contained false -o out --force
+              env:
+                  npm_config_userconfig: '${{ github.workspace }}/.npmrc'
+                  npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
+                  NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
+
+            - name: 'Upload the Publish Artifact'
+              uses: actions/upload-artifact@v2.2.2
+              with:
+                  name: ${{ inputs.artifact-name }}
+                  path: |
+                      ./out
+                  retention-days: 1
