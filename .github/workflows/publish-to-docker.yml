@@ -55,7 +55,7 @@ jobs:
             #   run: tar -xf ${{ inputs.artifact }}.tar
 
             - name: Display structure of downloaded files
-              run: ls -R
+              run: ls -1Rp
 
             - name: Set up QEMU
               uses: docker/setup-qemu-action@v1

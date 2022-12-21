@@ -1,82 +1,82 @@
 name: Publish to docker hub
 
 on:
-  workflow_call:
-    inputs:
-      artifact:  # id of input
-        description: 'The name of the artifact'
-        required: true
-        type: string
-        default: ''
-      region:
-        description: 'The aws region'
-        required: true
-        type: string
-        default: 'eu-west-1'
-      image-name:
-        description: 'The name of the docker image'
-        required: true
-        type: string
-        default: ''
-      image-tag:
-        description: 'The name of the tag for the docker image'
-        required: true
-        type: string
-        default: ''
-      dockerfile:
-        description: 'The path to the Dockerfile from the artifact'
-        required: false
-        type: string
-        default: 'dockerfile'
+    workflow_call:
+        inputs:
+            artifact: # id of input
+                description: 'The name of the artifact'
+                required: true
+                type: string
+                default: ''
+            region:
+                description: 'The aws region'
+                required: true
+                type: string
+                default: 'eu-west-1'
+            image-name:
+                description: 'The name of the docker image'
+                required: true
+                type: string
+                default: ''
+            image-tag:
+                description: 'The name of the tag for the docker image'
+                required: true
+                type: string
+                default: ''
+            dockerfile:
+                description: 'The path to the Dockerfile from the artifact'
+                required: false
+                type: string
+                default: 'dockerfile'
 
-    secrets:
-      access-key-id:
-        required: true
-      secret-access-key:
-        required: true
+        secrets:
+            access-key-id:
+                required: true
+            secret-access-key:
+                required: true
 
-    outputs:
-      image:
-        description: Return the name of the image
-        value: ${{ jobs.docker.outputs.image }}
+        outputs:
+            image:
+                description: Return the name of the image
+                value: ${{ jobs.docker.outputs.image }}
 
 jobs:
-  docker:
-    name: publish to docker hub
-    runs-on: ubuntu-latest
+    docker:
+        name: publish to docker hub
+        runs-on: ubuntu-latest
 
-    outputs:
-      image: ${{ steps.build-image.outputs.image }}
+        outputs:
+            image: ${{ steps.build-image.outputs.image }}
 
-    steps:
-      - name: 'Download Artifact'
-        uses: actions/download-artifact@v2
-        with: 
-          name: ${{ inputs.artifact }}
+        steps:
+            - name: 'Download Artifact'
+              uses: actions/download-artifact@v2
+              with:
+                  name: ${{ inputs.artifact }}
 
-      - name: Display structure of downloaded files
-        run: ls -R
+            - name: Display structure of downloaded files
+              run: ls -1Rp
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.access-key-id }}
-          aws-secret-access-key: ${{ secrets.secret-access-key }}
-          aws-region: ${{ inputs.region }}
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v1
+              with:
+                  aws-access-key-id: ${{ secrets.access-key-id }}
+                  aws-secret-access-key: ${{ secrets.secret-access-key }}
+                  aws-region: ${{ inputs.region }}
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+            - name: Login to Amazon ECR
+              id: login-ecr
+              uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build, tag, and push the image to Amazon ECR
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ inputs.image-name }}
-          IMAGE_TAG: ${{ inputs.image-tag }}
-        run: |
-          # Build a docker container and push it to ECR 
-          docker build -f ${{ inputs.dockerfile }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          echo "Pushing image to ECR..."
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+            - name: Build, tag, and push the image to Amazon ECR
+              id: build-image
+              env:
+                  ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+                  ECR_REPOSITORY: ${{ inputs.image-name }}
+                  IMAGE_TAG: ${{ inputs.image-tag }}
+              run: |
+                  # Build a docker container and push it to ECR 
+                  docker build -f ${{ inputs.dockerfile }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+                  echo "Pushing image to ECR..."
+                  docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+                  echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
