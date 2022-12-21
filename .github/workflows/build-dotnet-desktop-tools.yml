@@ -55,7 +55,12 @@ jobs:
             download: ${{ inputs.artifact-name }}
 
         steps:
-            - name: Checkout repository
+            - uses: actions/checkout@v3
+              name: Checkout repository
+              repository: ${{ inputs.repository }}
+              ref: ${{ inputs.branch }}
+
+            - name:
               run: |
                   git clone https://${{secrets.action-user}}:${{secrets.action-token}}@github.com/${{ inputs.repository }}.git .
 
