@@ -85,6 +85,10 @@ on:
                 required: true
             aws-secret-key:
                 required: true
+            certificate-file:
+                required: false
+            certificate-pwd:
+                required: false
 
 jobs:
     build-setup:
@@ -140,8 +144,8 @@ jobs:
             - name: Code sign a file with pfx certificate (digicert)
               uses: GermanBluefox/code-sign-action@v7
               with:
-                  certificate: ${{ secrets.ADVANCED_INSTALLER_SIGN_PFX }}
-                  password: ${{ secrets.ADVANCED_INSTALLER_SIGN_PFX_PWD }}
+                  certificate: ${{ secrets.certificate-file }}
+                  password: ${{ secrets.certificate-pwd }}
                   folder: ${{ github.workspace }}\out-setup
 
             - name: Publish setup artifact
