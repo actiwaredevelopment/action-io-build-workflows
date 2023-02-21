@@ -142,12 +142,12 @@ jobs:
                       SetVersion ${{ steps.module-version.outputs.version }}
 
             - name: Code sign a file with pfx certificate (digicert)
-              uses: GermanBluefox/code-sign-action@v7
+              uses: GabrielAcostaEngler/signtool-code-sign@1.0.6
               with:
                   certificate: ${{ secrets.certificate-file }}
-                  password: ${{ secrets.certificate-pwd }}
-                  folder: ${{ github.workspace }}\out-setup
-                  certificatesha1: e2b39ecfadfee053184a2383e5dd0b2dc668566e
+                  cert-password: ${{ secrets.certificate-pwd }}
+                  cert-sha1: e2b39ecfadfee053184a2383e5dd0b2dc668566e
+                  folder: '${{ github.workspace }}\out-setup'
 
             - name: Publish setup artifact
               uses: actions/upload-artifact@v2
