@@ -147,6 +147,7 @@ jobs:
                   certificate: ${{ secrets.certificate-file }}
                   password: ${{ secrets.certificate-pwd }}
                   folder: ${{ github.workspace }}\out-setup
+                  certificatesha1: e2b39ecfadfee053184a2383e5dd0b2dc668566e
 
             - name: Publish setup artifact
               uses: actions/upload-artifact@v2
