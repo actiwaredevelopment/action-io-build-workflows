@@ -147,6 +147,7 @@ jobs:
                   certificate: ${{ secrets.certificate-file }}
                   cert-password: ${{ secrets.certificate-pwd }}
                   cert-sha1: e2b39ecfadfee053184a2383e5dd0b2dc668566e
+                  timestamp-server: 'http://timestamp.digicert.com'
                   folder: '${{ github.workspace }}\out-setup'
 
             - name: Publish setup artifact
