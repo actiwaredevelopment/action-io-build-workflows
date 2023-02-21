@@ -137,6 +137,13 @@ jobs:
                       SetProperty SetupName="${{ inputs.setup-name }}"
                       SetVersion ${{ steps.module-version.outputs.version }}
 
+            - name: Code sign a file with pfx certificate (digicert)
+              uses: GermanBluefox/code-sign-action@v7
+              with:
+                  certificate: ${{ secrets.ADVANCED_INSTALLER_SIGN_PFX }}
+                  password: ${{ secrets.ADVANCED_INSTALLER_SIGN_PFX_PWD }}
+                  folder: ${{ github.workspace }}\out-setup
+
             - name: Publish setup artifact
               uses: actions/upload-artifact@v2
               with:
