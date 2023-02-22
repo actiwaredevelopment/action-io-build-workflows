@@ -159,7 +159,7 @@ jobs:
               uses: actions/upload-artifact@v2
               with:
                   name: ${{ inputs.artifact-setup }}
-                  path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}.exe
+                  path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}${{ inputs.setup-name-postfix }}.exe
 
     deploy-setups:
         name: 'Deploy to S3'
