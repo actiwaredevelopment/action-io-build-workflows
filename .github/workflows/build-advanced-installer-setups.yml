@@ -53,6 +53,11 @@ on:
                 required: true
                 type: string
                 default: ''
+            setup-name-postfix:
+                description: 'A postfix for the file name (appended after setup-name and before .exe)'
+                required: false
+                type: string
+                default: ''
             artifact-setup:
                 description: 'The name of setup artifact file'
                 required: true
@@ -130,7 +135,7 @@ jobs:
                   advinst-enable-automation: 'true'
                   aip-path: ${{ inputs.aip-file }}
                   aip-build-name: Release
-                  aip-package-name: ${{ inputs.setup-name }}.exe
+                  aip-package-name: ${{ inputs.setup-name }}${{ inputs.setup-name-postfix }}.exe
                   aip-output-dir: ${{ github.workspace }}\out-setup
                   aip-commands: |
                       SetProperty Manufacturer="${{ inputs.manufacture }}"
