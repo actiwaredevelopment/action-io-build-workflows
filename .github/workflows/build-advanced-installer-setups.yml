@@ -119,7 +119,7 @@ jobs:
 
             - name: Get module version
               id: module-version
-              uses: actiwaredevelopment/action-io-get-module-version@v0.5
+              uses: actiwaredevelopment/action-io-get-module-version@v0.6
               with:
                   module-definition-file: ${{ inputs.module-definition-file }}
                   fallback-version: '2.0.0'
@@ -135,7 +135,7 @@ jobs:
                   advinst-enable-automation: 'true'
                   aip-path: ${{ inputs.aip-file }}
                   aip-build-name: Release
-                  aip-package-name: ${{ inputs.setup-name }}${{ inputs.setup-name-postfix }}.exe
+                  aip-package-name: ${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ steps.module-version.outputs.versionNoBuild }}.exe
                   aip-output-dir: ${{ github.workspace }}\out-setup
                   aip-commands: |
                       SetProperty Manufacturer="${{ inputs.manufacture }}"
@@ -159,7 +159,7 @@ jobs:
               uses: actions/upload-artifact@v2
               with:
                   name: ${{ inputs.artifact-setup }}
-                  path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}${{ inputs.setup-name-postfix }}.exe
+                  path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ steps.module-version.outputs.versionNoBuild }}.exe
 
     deploy-setups:
         name: 'Deploy to S3'
@@ -175,7 +175,7 @@ jobs:
 
             - name: Get module version
               id: module-version
-              uses: actiwaredevelopment/action-io-get-module-version@v0.5
+              uses: actiwaredevelopment/action-io-get-module-version@v0.6
               with:
                   module-definition-file: ${{ inputs.module-definition-file }}
                   fallback-version: '2.0.0'
