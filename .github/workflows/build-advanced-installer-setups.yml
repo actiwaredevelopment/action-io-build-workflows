@@ -167,7 +167,7 @@ jobs:
                       SetProperty ServiceName="${{ inputs.service-name }}"
                       SetProperty SetupName="${{ inputs.setup-name }}"
                       SetProperty DEFAULT_DB="${{ inputs.setup-default-db }}"
-                      SetProperty PfxFile="${{ env.PFX_PATH }}"
+                      SetProperty PfxFile="${{ steps.create-pfx.outputs.PFX_PATH }}"
                       SetVersion ${{ steps.module-version.outputs.version }}
 
             - name: Delete PFX certificate
@@ -177,9 +177,9 @@ jobs:
               env:
                   PFX_PATH: ${{ steps.create-pfx.outputs.PFX_PATH }}
               run: |
-                  Remove-Item -Path $env:PFX_PATH;      
-            
-            - name: "Code sign a file with pfx certificate (digicert)"
+                  Remove-Item -Path $env:PFX_PATH;
+
+            - name: 'Code sign a file with pfx certificate (digicert)'
               if: ${{ inputs.sign-external == true }}
               uses: GabrielAcostaEngler/signtool-code-sign@1.0.6
               with:
