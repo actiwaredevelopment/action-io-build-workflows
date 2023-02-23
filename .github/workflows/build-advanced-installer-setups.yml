@@ -78,6 +78,11 @@ on:
                 required: false
                 type: string
                 default: 'actiware-setups'
+            sign-external:
+                description: 'Use external sign tool'
+                required: false
+                type: boolean
+                default: true
 
         secrets:
             aip-license:
@@ -127,6 +132,18 @@ jobs:
                   alternative-minor-version: ${{ inputs.minor-version }}
                   alternative-build-version: ${{ inputs.build-version }}
 
+            - name: Create PFX certificate
+              if: ${{ inputs.sign-external != true }}
+              id: create-pfx
+              shell: pwsh
+              env:
+                  PFX_CONTENT: ${{ secrets.certificate-file }}
+              run: |
+                  $pfxPath = Join-Path -Path $env:RUNNER_TEMP -ChildPath "cert.pfx";
+                  $encodedBytes = [System.Convert]::FromBase64String($env:PFX_CONTENT);
+                  Set-Content $pfxPath -Value $encodedBytes -AsByteStream;
+                  Write-Output "::set-output name=PFX_PATH::$pfxPath";
+
             - name: Build AIP
               uses: caphyon/advinst-github-action@v1.0
               with:
@@ -144,9 +161,18 @@ jobs:
                       SetProperty OemMajorRelease="${{ inputs.major-version }}"
                       SetProperty ServiceName="${{ inputs.service-name }}"
                       SetProperty SetupName="${{ inputs.setup-name }}"
+                      SetProperty PfxFile="${{ env.PFX_PATH }}"
                       SetVersion ${{ steps.module-version.outputs.version }}
 
+            - name: Delete PFX certificate
+              if: ${{ inputs.sign-external != true }}
+    	      shell: pwsh
+    	      env:
+      	        PFX_PATH: ${{ steps.create-pfx.outputs.PFX_PATH }}
+    	      run: Remove-Item -Path $env:PFX_PATH;
+
             - name: Code sign a file with pfx certificate (digicert)
+              if: ${{ inputs.sign-external == true }}
               uses: GabrielAcostaEngler/signtool-code-sign@1.0.6
               with:
                   certificate: ${{ secrets.certificate-file }}
