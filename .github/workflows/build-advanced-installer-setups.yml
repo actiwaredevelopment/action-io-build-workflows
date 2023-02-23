@@ -143,8 +143,9 @@ jobs:
               shell: pwsh
               env:
                   PFX_CONTENT: ${{ secrets.certificate-file }}
+                  WORKSPACE_PATH: ${{ github.workspace }}\.github\setup
               run: |
-                  $pfxPath = Join-Path -Path $env:RUNNER_TEMP -ChildPath "cert.pfx";
+                  $pfxPath = Join-Path -Path $env:WORKSPACE_PATH -ChildPath "cert.pfx";
                   $encodedBytes = [System.Convert]::FromBase64String($env:PFX_CONTENT);
                   Set-Content $pfxPath -Value $encodedBytes -AsByteStream;
                   Write-Output "::set-output name=PFX_PATH::$pfxPath";
