@@ -172,12 +172,14 @@ jobs:
 
             - name: Delete PFX certificate
               if: ${{ inputs.sign-external != true }}
-    	      shell: pwsh
-    	      env:
-      	        PFX_PATH: ${{ steps.create-pfx.outputs.PFX_PATH }}
-    	      run: Remove-Item -Path $env:PFX_PATH;
-
-            - name: Code sign a file with pfx certificate (digicert)
+              id: delete-pfx
+              shell: pwsh
+              env:
+                  PFX_PATH: ${{ steps.create-pfx.outputs.PFX_PATH }}
+              run: |
+                  Remove-Item -Path $env:PFX_PATH;      
+            
+            - name: "Code sign a file with pfx certificate (digicert)"
               if: ${{ inputs.sign-external == true }}
               uses: GabrielAcostaEngler/signtool-code-sign@1.0.6
               with:
