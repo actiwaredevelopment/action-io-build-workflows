@@ -8,6 +8,16 @@ on:
                 required: true
                 type: string
                 default: ''
+            artifact-additional: # id of input
+                description: 'The name of the additional artifact of the build output'
+                required: false
+                type: string
+                default: ''
+            artifact-additional-command: # id of input
+                description: 'An addition command for extraction'
+                required: false
+                type: string
+                default: ''
             aip-file: # id of input
                 description: 'The destination of the advanced installer project'
                 required: false
@@ -121,8 +131,24 @@ jobs:
                   name: ${{ inputs.artifact }}
                   path: ${{ github.workspace }}\src\setup
 
+            - name: 'Download Additional Artifact'
+              if: ${{ inputs.artifact-additional != '' }}
+              id: download-additional
+              uses: actions/download-artifact@v3
+              with:
+                  name: ${{ inputs.artifact-additional }}
+                  path: ${{ github.workspace }}\src\setup
+
+            - name: 'Extract web client'
+              if: ${{ inputs.artifact-additional-command != '' }}
+              run: ${{ inputs.artifact-additional-command }}
+
             - name: 'Echo download path'
               run: echo ${{steps.download.outputs.download-path}}
+
+            - name: 'Echo download path'
+              if: ${{ inputs.artifact-additional != '' }}
+              run: echo ${{steps.download-additional.outputs.download-path}}
 
             - name: Display structure of downloaded files
               run: Get-ChildItem -Recurse
