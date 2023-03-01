@@ -38,6 +38,11 @@ on:
                 required: false
                 type: string
                 default: 'IO'
+            fallback-version:
+                description: 'The fallback version of the product'
+                required: false
+                type: string
+                default: '2.0.0'
             major-version:
                 description: 'The major version of the product'
                 required: false
@@ -158,7 +163,7 @@ jobs:
               uses: actiwaredevelopment/action-io-get-module-version@v0.6
               with:
                   module-definition-file: ${{ inputs.module-definition-file }}
-                  fallback-version: '2.0.0'
+                  fallback-version: ${{ inputs.fallback-version }}
                   alternative-major-version: ${{ inputs.major-version }}
                   alternative-minor-version: ${{ inputs.minor-version }}
                   alternative-build-version: ${{ inputs.build-version }}
