@@ -15,7 +15,7 @@ on:
                 default: ''
             ui-project:
                 description: 'The project that should be build for the ui'
-                required: true
+                required: false
                 type: string
                 default: ''
             modulefile:
@@ -164,6 +164,7 @@ jobs:
                   echo "${{ secrets.npmrc-config }}" > .npmrc
 
             - name: 'Install dependencies and build ui'
+              if: ${{ inputs.ui-project != '' }}
               run: |
                   cd ${{ inputs.ui-project }}
                   yarn
