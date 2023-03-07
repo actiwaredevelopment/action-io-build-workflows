@@ -202,6 +202,7 @@ jobs:
               uses: actions/cache/restore@v3
               with:
                   key: ${{ inputs.module-artifact }}
+                  restore-keys: ${{ inputs.module-artifact }}
                   path: ${{ inputs.module-artifact-path }}
 
             - name: 'Create module definition file'
