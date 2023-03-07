@@ -27,10 +27,6 @@ on:
                 description: 'If given, the artifact will be downloaded before zipping the module'
                 required: false
                 type: string
-            module-cache:
-                description: 'If given, the cache will be downloaded before zipping the module'
-                required: false
-                type: string
             module-artifact-path:
                 description: 'Where to download the module artifact'
                 required: false
@@ -205,7 +201,7 @@ jobs:
               if: inputs.use-cache == true
               uses: actions/cache/restore@v3
               with:
-                  key: ${{ inputs.module-cache }}
+                  key: ${{ inputs.module-artifact }}
                   path: ${{ inputs.module-artifact-path }}
 
             - name: 'Create module definition file'
@@ -262,7 +258,7 @@ jobs:
               uses: actions/cache/save@v3
               if: inputs.use-cache == true
               with:
-                  key: ${{ inputs.cache-name }}
+                  key: ${{ inputs.artifact-name }}
                   path: |
                       ${{ github.workspace }}/${{ inputs.modulefile }}
                       ${{ inputs.module-info-json }}
