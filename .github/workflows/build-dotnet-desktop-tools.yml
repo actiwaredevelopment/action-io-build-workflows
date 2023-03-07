@@ -43,6 +43,11 @@ on:
                 required: false
                 type: string
                 default: 'Release'
+            use-cache:
+                description: 'Indication whether the cache should be used instead of artifacts'
+                required: false
+                type: boolean
+                default: false
 
         secrets:
             action-user:

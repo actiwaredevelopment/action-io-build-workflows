@@ -25,6 +25,11 @@ on:
                 description: 'Add additional nuget source'
                 type: string
                 required: false
+            use-cache:
+                description: 'Indication whether the cache should be used instead of artifacts'
+                required: false
+                type: boolean
+                default: false
 
         secrets:
             action-user:
