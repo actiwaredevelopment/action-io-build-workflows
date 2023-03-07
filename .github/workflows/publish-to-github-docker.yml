@@ -46,7 +46,8 @@ jobs:
               with:
                   key: ${{ inputs.artifact }}
                   restore-keys: ${{ inputs.artifact }}
-                  path: ./
+                  path: |
+                      ${{ github.workspace }}
                   fail-on-cache-miss: true
 
             - name: Display structure of downloaded files
