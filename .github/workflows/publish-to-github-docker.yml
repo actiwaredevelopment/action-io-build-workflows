@@ -44,7 +44,7 @@ jobs:
               if: inputs.use-cache == true
               uses: actions/cache/restore@v3
               with:
-                  key: ${{ inputs.cache-key }}
+                  key: ${{ inputs.artifact }}
 
             - name: Display structure of downloaded files
               run: ls -a
