@@ -103,7 +103,7 @@ on:
 jobs:
     build:
         name: build for nodejs
-        runs-on: ubuntu-runners
+        runs-on: ubuntu-latest
 
         outputs:
             download: ${{ inputs.artifact-name }}
