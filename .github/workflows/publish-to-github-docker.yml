@@ -45,6 +45,7 @@ jobs:
               uses: actions/cache/restore@v3
               with:
                   key: ${{ inputs.artifact }}
+                  path: ${{ github.workspace }}
 
             - name: Display structure of downloaded files
               run: ls -a
