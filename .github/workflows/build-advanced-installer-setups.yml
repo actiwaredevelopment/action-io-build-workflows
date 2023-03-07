@@ -123,7 +123,7 @@ on:
 jobs:
     build-setup:
         name: 'Build Windows Setup'
-        runs-on: windows-latest
+        runs-on: windows-setups
 
         steps:
             - name: Check out repository code
