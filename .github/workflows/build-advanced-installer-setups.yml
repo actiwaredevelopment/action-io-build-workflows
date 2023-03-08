@@ -288,6 +288,9 @@ jobs:
                   fail-on-cache-miss: true
                   enableCrossOsArchive: true
 
+            - name: Display structure of downloaded files
+              run: ls -a
+
             - name: Get module version
               id: module-version
               uses: actiwaredevelopment/action-io-get-module-version@v0.6
@@ -331,7 +334,7 @@ jobs:
                   # Name of S3 Bucket
                   bucket: ${{ inputs.s3-bucket }}
                   # A Local Source Directory to Upload
-                  source: ${{ needs.build-setup.outputs.setup-cache-path }}
+                  source: ${{ github.workspace }}\out-setup
                   # A Remote Target Directory to Upload
                   target: '${{ inputs.publish-target }}'
                   tags: 'version=${{ steps.module-version.outputs.version }}'
