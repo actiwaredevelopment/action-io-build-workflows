@@ -115,6 +115,10 @@ on:
                 description: Return the name of the artifact download
                 value: ${{ jobs.build.outputs.download }}
 
+            cache-path:
+                description: Return the paths of the cache
+                value: ${{ jobs.build.outputs.cache-path }}
+
 jobs:
     build:
         name: Build for ${{ inputs.rid }}
@@ -122,6 +126,15 @@ jobs:
 
         outputs:
             download: ${{ inputs.artifact-name }}
+            cache-path: |
+                ${{ github.workspace }}/${{ inputs.modulefile }}
+                ${{ inputs.module-info-json }}
+                ${{ inputs.ui-build-path }}
+                ${{ inputs.module-languages }}
+                ${{ inputs.module-aip-setup }}
+                ./dockerfile
+                ./version.txt
+                ./out
 
         steps:
             - name: Build conditions
@@ -246,6 +259,7 @@ jobs:
 
             - name: 'Upload the Publish Artifact'
               uses: actions/upload-artifact@v2.2.2
+              if: inputs.use-cache == false
               with:
                   name: ${{ inputs.artifact-name }}
                   path: |
@@ -258,3 +272,18 @@ jobs:
                       ./version.txt
                       ./out
                   retention-days: 1
+
+            - name: 'Upload to cache'
+              if: inputs.use-cache == true
+              uses: actions/cache/save@v3
+              with:
+                  key: ${{ inputs.artifact-name }}
+                  path: |
+                      ${{ github.workspace }}/${{ inputs.modulefile }}
+                      ${{ inputs.module-info-json }}
+                      ${{ inputs.ui-build-path }}
+                      ${{ inputs.module-languages }}
+                      ${{ inputs.module-aip-setup }}
+                      ./dockerfile
+                      ./version.txt
+                      ./out

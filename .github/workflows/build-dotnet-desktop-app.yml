@@ -30,6 +30,11 @@ on:
                 required: false
                 type: boolean
                 default: false
+            cache-path:
+                description: 'Indication whether the cache should be used instead of artifacts'
+                required: false
+                type: string
+                default: ${{ github.workspace }}
 
         secrets:
             action-user:
@@ -39,6 +44,15 @@ on:
             awdev-nuget-source:
                 required: true
 
+        outputs:
+            download:
+                description: Return the name of the artifact download
+                value: ${{ jobs.build.outputs.download }}
+
+            cache-path:
+                description: Return the paths of the cache
+                value: ${{ jobs.build.outputs.cache-path }}
+
 jobs:
     build:
         name: 'Build Desktop App'
@@ -46,6 +60,8 @@ jobs:
 
         outputs:
             download: ${{ inputs.artifact-name }}
+            cache-path: |
+                ${{ inputs.artifact-files }}
 
         steps:
             - uses: actions/checkout@v1
@@ -73,7 +89,15 @@ jobs:
               run: '& "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\bin\MSBuild.exe" "${{ inputs.sln-file }}" /p:Configuration=${{ inputs.build-config }}'
 
             - name: Upload Artifact
+              if: inputs.use-cache == false
               uses: actions/upload-artifact@v2
               with:
                   name: ${{ inputs.artifact-name }}
+                  path: ${{ inputs.artifact-files }}
+
+            - name: 'Upload the Publish Artifact'
+              if: inputs.use-cache == true
+              uses: actions/cache/save@v3
+              with:
+                  key: ${{ inputs.artifact-name }}
                   path: ${{ inputs.artifact-files }}

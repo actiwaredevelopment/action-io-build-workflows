@@ -105,6 +105,10 @@ on:
                 description: Return the name of the artifact download
                 value: ${{ jobs.build.outputs.download }}
 
+            cache-path:
+                description: Return the paths of the cache
+                value: ${{ jobs.build.outputs.cache-path }}
+
 jobs:
     build:
         name: build for nodejs
@@ -112,6 +116,17 @@ jobs:
 
         outputs:
             download: ${{ inputs.artifact-name }}
+            cache-path: |
+                ${{ github.workspace }}/${{ inputs.modulefile }}
+                ${{ inputs.module-info-json }}
+                ${{ inputs.module-languages }}
+                ${{ inputs.module-aip-setup }}
+                ${{ inputs.build-path }}
+                ${{ inputs.build-ui-path }}
+                ${{ inputs.project }}/node_modules
+                ./package.json
+                ./dockerfile
+                ./version.txt
 
         steps:
             - name: Build conditions
@@ -255,27 +270,19 @@ jobs:
                       ./version.txt
                   retention-days: 1
 
-            # - name: 'Upload the Publish Artifact'
-            #   uses: actions/cache/save@v3
-            #   if: inputs.use-cache == true
-            #   with:
-            #       key: ${{ inputs.artifact-name }}
-            #       path: |
-            #           ${{ github.workspace }}/${{ inputs.modulefile }}
-            #           ${{ inputs.module-info-json }}
-            #           ${{ inputs.module-languages }}
-            #           ${{ inputs.module-aip-setup }}
-            #           ${{ inputs.build-path }}
-            #           ${{ inputs.build-ui-path }}
-            #           ${{ inputs.project }}/node_modules
-            #           ./package.json
-            #           ./dockerfile
-            #           ./version.txt
-
             - name: 'Upload to the cache'
               uses: actions/cache/save@v3
               if: inputs.use-cache == true
               with:
                   key: ${{ inputs.artifact-name }}
                   path: |
-                      ${{ github.workspace }}
+                      ${{ github.workspace }}/${{ inputs.modulefile }}
+                      ${{ inputs.module-info-json }}
+                      ${{ inputs.module-languages }}
+                      ${{ inputs.module-aip-setup }}
+                      ${{ inputs.build-path }}
+                      ${{ inputs.build-ui-path }}
+                      ${{ inputs.project }}/node_modules
+                      ./package.json
+                      ./dockerfile
+                      ./version.txt

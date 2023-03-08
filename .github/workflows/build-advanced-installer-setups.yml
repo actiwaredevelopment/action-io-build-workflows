@@ -108,6 +108,11 @@ on:
                 required: false
                 type: boolean
                 default: false
+            cache-path:
+                description: 'Indication whether the cache should be used instead of artifacts'
+                required: false
+                type: string
+                default: ${{ github.workspace }}
 
         secrets:
             aip-license:
@@ -130,24 +135,38 @@ jobs:
         name: 'Build Windows Setup'
         runs-on: windows-setups
 
+        outputs:
+            setup-cache-key: ${{ inputs.artifact-setup }}-${{ steps.module-version.outputs.versionNoBuild }}
+            setup-cache-path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ steps.module-version.outputs.versionNoBuild }}.exe
+
         steps:
             - name: Check out repository code
               uses: actions/checkout@v2
 
             - name: 'Download Artifact'
               id: download
+              if: inputs.use-cache == false
               uses: actions/download-artifact@v3
               with:
                   name: ${{ inputs.artifact }}
                   path: ${{ github.workspace }}\src\setup
 
             - name: 'Download Additional Artifact'
-              if: ${{ inputs.artifact-additional != '' }}
+              if: ${{ inputs.use-cache == false && inputs.artifact-additional != '' }}
               id: download-additional
               uses: actions/download-artifact@v3
               with:
                   name: ${{ inputs.artifact-additional }}
                   path: ${{ github.workspace }}\src\setup
+
+            - name: 'Download from cache'
+              if: inputs.use-cache == true
+              uses: actions/cache/restore@v3
+              with:
+                  key: ${{ inputs.artifact }}
+                  restore-keys: ${{ inputs.artifact }}
+                  path: ${{ inputs.cache-path }}
+                  fail-on-cache-miss: true
 
             - name: 'Extract web client'
               if: ${{ inputs.artifact-additional-command != '' }}
@@ -228,9 +247,17 @@ jobs:
                   folder: '${{ github.workspace }}\out-setup'
 
             - name: Publish setup artifact
+              if: inputs.use-cache == false
               uses: actions/upload-artifact@v2
               with:
                   name: ${{ inputs.artifact-setup }}
+                  path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ steps.module-version.outputs.versionNoBuild }}.exe
+
+            - name: Publish setup artifact to cache
+              if: inputs.use-cache == true
+              uses: actions/cache/save@v3
+              with:
+                  key: ${{ inputs.artifact-setup }}-${{ steps.module-version.outputs.versionNoBuild }}
                   path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ steps.module-version.outputs.versionNoBuild }}.exe
 
     deploy-setups:
@@ -241,9 +268,21 @@ jobs:
         steps:
             - name: 'Download Artifact'
               id: download-setup
+              if: inputs.use-cache == false
               uses: actions/download-artifact@v2.0.8
               with:
                   name: ${{ inputs.artifact-setup }}
+
+            - name: 'Use cache'
+              id: cache-setup
+              if: inputs.use-cache == true
+              uses: actions/cache/restore@v3
+              with:
+                  key: ${{ needs.build-setup.outputs.setup-cache-key }}
+                  restore-keys: ${{ needs.build-setup.outputs.setup-cache-key }}
+                  path: |
+                      ${{ needs.build-setup.outputs.setup-cache-path }}
+                  fail-on-cache-miss: true
 
             - name: Get module version
               id: module-version
@@ -266,6 +305,7 @@ jobs:
 
             - name: 'Upload files'
               uses: actiwaredevelopment/aws-deploy-s3@v4
+              if: inputs.use-cache == false
               with:
                   # AWS Region of S3 Bucket
                   region: eu-central-1
@@ -273,6 +313,21 @@ jobs:
                   bucket: ${{ inputs.s3-bucket }}
                   # A Local Source Directory to Upload
                   source: ${{ steps.download-setup.outputs.download-path }}
+                  # A Remote Target Directory to Upload
+                  target: '${{ inputs.publish-target }}'
+                  tags: 'version=${{ steps.module-version.outputs.version }}'
+                  clear-target: 'false'
+
+            - name: 'Upload files from cache'
+              uses: actiwaredevelopment/aws-deploy-s3@v4
+              if: inputs.use-cache == true
+              with:
+                  # AWS Region of S3 Bucket
+                  region: eu-central-1
+                  # Name of S3 Bucket
+                  bucket: ${{ inputs.s3-bucket }}
+                  # A Local Source Directory to Upload
+                  source: ${{ needs.build-setup.outputs.setup-cache-path }}
                   # A Remote Target Directory to Upload
                   target: '${{ inputs.publish-target }}'
                   tags: 'version=${{ steps.module-version.outputs.version }}'
