@@ -13,6 +13,11 @@ on:
                 required: false
                 type: boolean
                 default: false
+            cache-path:
+                description: 'Indication whether the cache should be used instead of artifacts'
+                required: false
+                type: string
+                default: ${{ github.workspace }}
             image-name:
                 description: 'The name of the docker image'
                 required: true
@@ -47,7 +52,7 @@ jobs:
                   key: ${{ inputs.artifact }}
                   restore-keys: ${{ inputs.artifact }}
                   path: |
-                      ${{ github.workspace }}
+                      ${{ inputs.cache-path }}
                   fail-on-cache-miss: true
 
             - name: Display structure of downloaded files

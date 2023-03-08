@@ -27,11 +27,26 @@ on:
                 description: 'The name of the tag that should be removed'
                 required: false
                 type: string
+            dockerfile:
+                description: 'The name of the tag that should be removed'
+                required: false
+                type: string
+                default: 'dockerfile'
             force-remove:
                 description: 'The name of the tag that should be removed'
                 required: false
                 type: boolean
                 default: false
+            use-cache:
+                description: 'Indication whether the cache should be used instead of artifacts'
+                required: false
+                type: boolean
+                default: false
+            cache-path:
+                description: 'Indication whether the cache should be used instead of artifacts'
+                required: false
+                type: string
+                default: ${{ github.workspace }}
 
         secrets:
             docker-username:
@@ -46,9 +61,20 @@ jobs:
 
         steps:
             - name: 'Download Artifact'
+              if: inputs.use-cache == false
               uses: actions/download-artifact@v2
               with:
                   name: ${{ inputs.artifact }}
+
+            - name: 'Use cache'
+              if: inputs.use-cache == true
+              uses: actions/cache/restore@v3
+              with:
+                  key: ${{ inputs.artifact }}
+                  restore-keys: ${{ inputs.artifact }}
+                  path: |
+                      ${{ inputs.cache-path }}
+                  fail-on-cache-miss: true
 
             # - name: Unpack Artifact
             #   if: ${{ inputs.use-tar }}
@@ -76,5 +102,5 @@ jobs:
                   tags: ${{ inputs.image-name }}:${{ inputs.image-tag }}
                   remove-tags: ${{ inputs.remove-tags }}
                   force-remove: ${{ inputs.force-remove }}
-                  file: dockerfile
+                  file: ${{ inputs.dockerfile }}
                   push: true
