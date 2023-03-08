@@ -171,10 +171,11 @@ jobs:
               run: ${{ inputs.artifact-additional-command }}
 
             - name: 'Echo download path'
+              if: inputs.use-cache == false
               run: echo ${{steps.download.outputs.download-path}}
 
             - name: 'Echo download path'
-              if: ${{ inputs.artifact-additional != '' }}
+              if: ${{ inputs.use-cache == false && inputs.artifact-additional != '' }}
               run: echo ${{steps.download-additional.outputs.download-path}}
 
             - name: Display structure of downloaded files
