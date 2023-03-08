@@ -140,9 +140,6 @@ jobs:
             setup-cache-path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ steps.module-version.outputs.versionNoBuild }}.exe
 
         steps:
-            - name: Check out repository code
-              uses: actions/checkout@v2
-
             - name: 'Download Artifact'
               id: download
               if: inputs.use-cache == false
