@@ -270,6 +270,9 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
+            - name: Check out repository code
+              uses: actions/checkout@v3
+
             - name: 'Download Artifact'
               id: download-setup
               if: inputs.use-cache == false
@@ -335,7 +338,7 @@ jobs:
                   # Name of S3 Bucket
                   bucket: ${{ inputs.s3-bucket }}
                   # A Local Source Directory to Upload
-                  source: ${{ github.workspace }}/out-setup/${{ needs.build-setup.outputs.setup-cache-file }}
+                  source: ${{ github.workspace }}/out-setup
                   # A Remote Target Directory to Upload
                   target: '${{ inputs.publish-target }}'
                   tags: 'version=${{ steps.module-version.outputs.version }}'
