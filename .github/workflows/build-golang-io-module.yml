@@ -261,3 +261,4 @@ jobs:
                       ${{ inputs.outputfile }}
                       ./dockerfile
                       ./version.txt
+                  enableCrossOsArchive: true

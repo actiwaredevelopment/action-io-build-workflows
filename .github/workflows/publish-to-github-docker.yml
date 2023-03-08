@@ -54,6 +54,7 @@ jobs:
                   path: |
                       ${{ inputs.cache-path }}
                   fail-on-cache-miss: true
+                  enableCrossOsArchive: true
 
             - name: Display structure of downloaded files
               run: ls -a

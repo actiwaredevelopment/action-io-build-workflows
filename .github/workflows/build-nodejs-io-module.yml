@@ -219,6 +219,8 @@ jobs:
                   key: ${{ inputs.module-artifact }}
                   restore-keys: ${{ inputs.module-artifact }}
                   path: ${{ inputs.module-artifact-path }}
+                  fail-on-cache-miss: true
+                  enableCrossOsArchive: true
 
             - name: 'Create module definition file'
               uses: vimtor/action-zip@v1
@@ -286,3 +288,4 @@ jobs:
                       ./package.json
                       ./dockerfile
                       ./version.txt
+                  enableCrossOsArchive: true

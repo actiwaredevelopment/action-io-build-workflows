@@ -151,3 +151,4 @@ jobs:
                   key: ${{ inputs.artifact-name }}
                   path: |
                       ./out
+                  enableCrossOsArchive: true

@@ -164,6 +164,7 @@ jobs:
                   restore-keys: ${{ inputs.artifact }}
                   path: ${{ inputs.cache-path }}
                   fail-on-cache-miss: true
+                  enableCrossOsArchive: true
 
             - name: 'Extract web client'
               if: ${{ inputs.artifact-additional-command != '' }}
@@ -256,6 +257,7 @@ jobs:
               with:
                   key: ${{ inputs.artifact-setup }}-${{ steps.module-version.outputs.versionNoBuild }}
                   path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ steps.module-version.outputs.versionNoBuild }}.exe
+                  enableCrossOsArchive: true
 
     deploy-setups:
         name: 'Deploy to S3'
@@ -280,6 +282,7 @@ jobs:
                   path: |
                       ${{ needs.build-setup.outputs.setup-cache-path }}
                   fail-on-cache-miss: true
+                  enableCrossOsArchive: true
 
             - name: Get module version
               id: module-version

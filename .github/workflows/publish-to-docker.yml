@@ -75,6 +75,7 @@ jobs:
                   path: |
                       ${{ inputs.cache-path }}
                   fail-on-cache-miss: true
+                  enableCrossOsArchive: true
 
             # - name: Unpack Artifact
             #   if: ${{ inputs.use-tar }}

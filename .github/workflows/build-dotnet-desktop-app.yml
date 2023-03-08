@@ -101,3 +101,4 @@ jobs:
               with:
                   key: ${{ inputs.artifact-name }}
                   path: ${{ inputs.artifact-files }}
+                  enableCrossOsArchive: true
