@@ -138,6 +138,7 @@ jobs:
         outputs:
             setup-cache-key: ${{ inputs.artifact-setup }}-${{ steps.module-version.outputs.versionNoBuild }}
             setup-cache-path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ steps.module-version.outputs.versionNoBuild }}.exe
+            setup-cache-file: ${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ steps.module-version.outputs.versionNoBuild }}.exe
 
         steps:
             - name: Check out repository code
@@ -289,7 +290,7 @@ jobs:
                   enableCrossOsArchive: true
 
             - name: Display structure of downloaded files
-              run: ls -a
+              run: find ${{ github.workspace }}
 
             - name: Get module version
               id: module-version
@@ -334,7 +335,7 @@ jobs:
                   # Name of S3 Bucket
                   bucket: ${{ inputs.s3-bucket }}
                   # A Local Source Directory to Upload
-                  source: ${{ github.workspace }}\out-setup
+                  source: ${{ github.workspace }}/out-setup/${{ needs.build-setup.outputs.setup-cache-file }}
                   # A Remote Target Directory to Upload
                   target: '${{ inputs.publish-target }}'
                   tags: 'version=${{ steps.module-version.outputs.version }}'
