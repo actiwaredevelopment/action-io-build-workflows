@@ -108,6 +108,11 @@ on:
                 required: false
                 type: boolean
                 default: false
+            delete-cache:
+                description: 'Indication whether the cache should be delete after upload'
+                required: false
+                type: boolean
+                default: false
             cache-path:
                 description: 'Indication whether the cache should be used instead of artifacts'
                 required: false
@@ -129,6 +134,11 @@ on:
                 required: false
             certificate-pwd:
                 required: false
+
+        outputs:
+            cache-key:
+                description: Return the key that should be used for the setup files
+                value: ${{ jobs.build-setup.outputs.setup-cache-key }}
 
 jobs:
     build-setup:
@@ -343,3 +353,9 @@ jobs:
                   target: '${{ inputs.publish-target }}'
                   tags: 'version=${{ steps.module-version.outputs.version }}'
                   clear-target: 'false'
+
+            - name: 'Delete cache'
+              if: inputs.use-cache == true && inputs.delete-cache == true
+              uses: snnaplab/delete-branch-cache-action@v1.0.0
+              with:
+                  key: ${{ needs.build-setup.outputs.setup-cache-key }}
