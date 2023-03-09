@@ -286,7 +286,7 @@ jobs:
             - name: 'Download Artifact'
               id: download-setup
               if: inputs.use-cache == false
-              uses: actions/download-artifact@v2.0.8
+              uses: actions/download-artifact@v3
               with:
                   name: ${{ inputs.artifact-setup }}
 
@@ -324,24 +324,24 @@ jobs:
                   # AWS Secret Access Key. This input is required if running in the GitHub hosted environment. It is optional if running in a self-hosted environment that already has AWS credentials, for example on an EC2 instance.
                   aws-secret-access-key: ${{ secrets.aws-secret-key }}
 
-            - name: 'Upload files'
-              uses: actiwaredevelopment/aws-deploy-s3@v4
-              if: inputs.use-cache == false
-              with:
-                  # AWS Region of S3 Bucket
-                  region: eu-central-1
-                  # Name of S3 Bucket
-                  bucket: ${{ inputs.s3-bucket }}
-                  # A Local Source Directory to Upload
-                  source: ${{ steps.download-setup.outputs.download-path }}
-                  # A Remote Target Directory to Upload
-                  target: '${{ inputs.publish-target }}'
-                  tags: 'version=${{ steps.module-version.outputs.version }}'
-                  clear-target: 'false'
+            # - name: 'Upload files'
+            #   uses: actiwaredevelopment/aws-deploy-s3@v4
+            #   if: inputs.use-cache == false
+            #   with:
+            #       # AWS Region of S3 Bucket
+            #       region: eu-central-1
+            #       # Name of S3 Bucket
+            #       bucket: ${{ inputs.s3-bucket }}
+            #       # A Local Source Directory to Upload
+            #       source: ${{ steps.download-setup.outputs.download-path }}
+            #       # A Remote Target Directory to Upload
+            #       target: '${{ inputs.publish-target }}'
+            #       tags: 'version=${{ steps.module-version.outputs.version }}'
+            #       clear-target: 'false'
 
             - name: 'Upload files from cache'
               uses: actiwaredevelopment/aws-deploy-s3@v4
-              if: inputs.use-cache == true
+              #   if: inputs.use-cache == true
               with:
                   # AWS Region of S3 Bucket
                   region: eu-central-1
