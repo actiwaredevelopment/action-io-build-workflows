@@ -70,8 +70,6 @@ jobs:
                     fi
                   fi
 
-                  mv ${{ inputs.dockerfile }} ./dockerfile
-
             - uses: actions/setup-node@v2
               with:
                   always-auth: true
