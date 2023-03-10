@@ -79,17 +79,26 @@ jobs:
               with:
                   always-auth: true
                   registry-url: 'https://npm.pkg.github.com'
-                  token: ${{ secrets.GITHUB_TOKEN }}
+                  token: ${{ secrets.action-token }}
                   scope: '@actiwaredevelopment'
+
+            - name: Create npmrc
+              run: |
+                  echo "${{ secrets.npmrc-config }}" > .npmrc
+
+            - name: Inject insteadOf configuration
+              run: |
+                  git config --global url."https://{{ secrets.action-user }}:${{ secrets.action-token }}@github.com/".insteadOf "https://github.com/"
 
             - name: Build
               run: |
                   cd ${{ inputs.src-path }}
                   yarn install
-                  git config --global user.email "$GITHUB_ACTOR@users.noreply.github.com" && git config --global user.name "$GITHUB_ACTOR"
                   yarn build
               env:
-                  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  npm_config_userconfig: '${{ github.workspace }}/.npmrc'
+                  npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
+                  NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
 
             - name: Add build to cache
               uses: actions/cache/save@v3
