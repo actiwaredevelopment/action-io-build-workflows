@@ -60,8 +60,7 @@ jobs:
 
         outputs:
             download: ${{ inputs.artifact-name }}
-            cache-path: |
-                ${{ inputs.artifact-files }}
+            cache-path: ${{ inputs.artifact-files }}
 
         steps:
             - uses: actions/checkout@v1

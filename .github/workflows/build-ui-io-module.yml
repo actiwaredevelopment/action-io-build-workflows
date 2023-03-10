@@ -1,0 +1,95 @@
+name: Build .net io module
+
+on:
+    workflow_call:
+        inputs:
+            repository: # id of input
+                description: 'The repository of the io module'
+                required: true
+                type: string
+                default: ${{ github.repository }}
+            src-path:
+                description: 'Enter where to find the ui (HTML) build.'
+                required: false
+                type: string
+                default: './src/configuration'
+            build-path:
+                description: 'Enter where to find the ui (HTML) build.'
+                required: false
+                type: string
+                default: './src/configuration/build'
+            artifact-name:
+                description: 'The name of the artifact'
+                required: false
+                type: string
+                default: 'BuildUiOutput'
+
+        secrets:
+            action-user:
+                required: true
+            action-token:
+                required: true
+            awdev-nuget-source:
+                required: true
+            npm-package-token:
+                required: true
+            npmrc-config:
+                required: true
+
+        outputs:
+            cache-key:
+                description: Return the name of the artifact download
+                value: ${{ jobs.build.outputs.cache-key }}
+
+            cache-path:
+                description: Return the paths of the cache
+                value: ${{ jobs.build.outputs.cache-path }}
+
+jobs:
+    build:
+        name: Build for ${{ inputs.rid }}
+        runs-on: ubuntu-latest-8-cores
+
+        outputs:
+            cache-key: ${{ inputs.artifact-name }}
+            cache-path: |
+                ${{ inputs.build-path }}
+
+        steps:
+            - name: Checkout repository
+              run: |
+                  git clone https://${{secrets.action-user}}:${{secrets.action-token}}@github.com/${{ inputs.repository }}.git .
+
+                  if [ ${{ inputs.branch }} != '' ]
+                  then
+                    if [[ ${{ inputs.branch }} == tags* ]]
+                    then
+                      git checkout ${{ inputs.branch }} -b latest
+                    else
+                      git checkout ${{ inputs.branch }}
+                    fi
+                  fi
+
+                  mv ${{ inputs.dockerfile }} ./dockerfile
+
+            - uses: actions/setup-node@v2
+              with:
+                  always-auth: true
+                  registry-url: 'https://npm.pkg.github.com'
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  scope: '@actiwaredevelopment'
+
+            - name: Build
+              run: |
+                  cd ${{ inputs.src-path }}
+                  yarn install
+                  git config --global user.email "$GITHUB_ACTOR@users.noreply.github.com" && git config --global user.name "$GITHUB_ACTOR"
+                  yarn build
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Add build to cache
+              uses: actions/cache/save@v3
+              with:
+                  key: ${{ inputs.artifact-name }}
+                  path: ${{ inputs.build-path }}
