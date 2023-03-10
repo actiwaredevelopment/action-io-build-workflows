@@ -188,6 +188,24 @@ jobs:
               with:
                   key: ${{ inputs.ui-build-cache-key }}
                   path: ${{ inputs.ui-build-cache-path }}
+                  fail-on-cache-miss: true
+                  enableCrossOsArchive: true
+
+            - name: Download additional files for module
+              if: inputs.module-artifact != '' && inputs.use-cache == false
+              uses: actions/download-artifact@v2
+              with:
+                  name: ${{ inputs.module-artifact }}
+                  path: ${{ inputs.module-artifact-path }}
+                  fail-on-cache-miss: true
+                  enableCrossOsArchive: true
+
+            - name: Restore cache for additional files for module
+              if: inputs.module-artifact != '' && inputs.use-cache == true
+              uses: actions/cache/restore@v3
+              with:
+                  key: ${{ inputs.module-artifact }}
+                  path: ${{ inputs.module-artifact-path }}
 
             - name: Setup .NET
               uses: actions/setup-dotnet@v1
@@ -240,20 +258,6 @@ jobs:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
                   NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
-
-            - name: Download additional files for module
-              if: inputs.module-artifact != '' && inputs.use-cache == false
-              uses: actions/download-artifact@v2
-              with:
-                  name: ${{ inputs.module-artifact }}
-                  path: ${{ inputs.module-artifact-path }}
-
-            - name: Restore cache for additional files for module
-              if: inputs.module-artifact != '' && inputs.use-cache == true
-              uses: actions/cache/restore@v3
-              with:
-                  key: ${{ inputs.module-artifact }}
-                  path: ${{ inputs.module-artifact-path }}
 
             - name: 'Create module definition file'
               uses: vimtor/action-zip@v1
