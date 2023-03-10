@@ -8,6 +8,11 @@ on:
                 required: true
                 type: string
                 default: ${{ github.repository }}
+            branch:
+                description: 'The name of the branch that should be checkout'
+                required: false
+                type: string
+                default: ''
             src-path:
                 description: 'Enter where to find the ui (HTML) build.'
                 required: false
