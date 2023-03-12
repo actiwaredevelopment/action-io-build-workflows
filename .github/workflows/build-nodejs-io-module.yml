@@ -189,6 +189,7 @@ jobs:
               if: ${{ inputs.ui-project != '' }}
               run: |
                   cd ${{ inputs.ui-project }}
+                  yarn licenses generate-disclaimer >> public/third-party.txt
                   yarn
                   yarn run build
               env:
