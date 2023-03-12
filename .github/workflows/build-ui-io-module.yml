@@ -76,6 +76,7 @@ jobs:
                   fi
 
             - uses: actions/setup-node@v2
+              working-directory: ${{ inputs.src-path }}
               with:
                   always-auth: true
                   registry-url: 'https://npm.pkg.github.com'
@@ -92,8 +93,8 @@ jobs:
                   git config --global url."https://{{ secrets.action-user }}:${{ secrets.action-token }}@github.com/".insteadOf "https://github.com/"
 
             - name: Build
+              working-directory: ${{ inputs.src-path }}
               run: |
-                  cd ${{ inputs.src-path }}
                   yarn install
                   yarn build
               env:
