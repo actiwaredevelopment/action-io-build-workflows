@@ -170,6 +170,7 @@ jobs:
                   registry-url: 'https://npm.pkg.github.com'
                   token: ${{ secrets.action-token }}
                   scope: '@actiwaredevelopment'
+                  cache: 'yarn'
 
             - name: Create npmrc
               run: |
