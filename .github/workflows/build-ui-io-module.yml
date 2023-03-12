@@ -95,7 +95,8 @@ jobs:
             - name: Build
               run: |
                   cd ${{ inputs.src-path }}
-                  yarn licenses generate-disclaimer >> public/third-party.txt
+                  yarn licenses yarn licenses list --json --no-progress >> public/third-party.json
+                  yarn licenses generate-disclaimer >> public/disclaimer.txt
                   yarn install
                   yarn build
               env:
