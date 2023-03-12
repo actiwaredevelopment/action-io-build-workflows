@@ -76,13 +76,13 @@ jobs:
                   fi
 
             - uses: actions/setup-node@v2
-              working-directory: ${{ inputs.src-path }}
               with:
                   always-auth: true
                   registry-url: 'https://npm.pkg.github.com'
                   token: ${{ secrets.action-token }}
                   scope: '@actiwaredevelopment'
                   cache: 'yarn'
+                  cache-dependency-path: ${{ inputs.src-path }}
 
             - name: Create npmrc
               run: |
