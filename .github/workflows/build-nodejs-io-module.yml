@@ -115,7 +115,7 @@ jobs:
         runs-on: ubuntu-latest-8-cores
 
         outputs:
-            download: ${{ inputs.artifact-name }}-${{ GITHUB_SHA }}
+            download: ${{ inputs.artifact-name }}-${{ github.sha }}
             cache-path: |
                 ${{ github.workspace }}/${{ inputs.modulefile }}
                 ${{ inputs.module-info-json }}
@@ -280,7 +280,7 @@ jobs:
               uses: actions/cache/save@v3
               if: inputs.use-cache == true
               with:
-                  key: ${{ inputs.artifact-name }}-${{ GITHUB_SHA }}
+                  key: ${{ inputs.artifact-name }}-${{ github.sha }}
                   path: |
                       ${{ github.workspace }}/${{ inputs.modulefile }}
                       ${{ inputs.module-info-json }}

@@ -59,7 +59,7 @@ jobs:
         runs-on: windows-setups
 
         outputs:
-            download: ${{ inputs.artifact-name }}-${{ GITHUB_SHA }}
+            download: ${{ inputs.artifact-name }}-${{ github.sha }}
             cache-path: ${{ inputs.artifact-files }}
 
         steps:
@@ -98,6 +98,6 @@ jobs:
               if: inputs.use-cache == true
               uses: actions/cache/save@v3
               with:
-                  key: ${{ inputs.artifact-name }}-${{ GITHUB_SHA }}
+                  key: ${{ inputs.artifact-name }}-${{ github.sha }}
                   path: ${{ inputs.artifact-files }}
                   enableCrossOsArchive: true
