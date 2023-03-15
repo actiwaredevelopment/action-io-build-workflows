@@ -288,7 +288,8 @@ jobs:
               if: inputs.use-cache == false
               uses: actions/download-artifact@v3
               with:
-                  name: ${{ inputs.artifact-setup }}/out-setup
+                  name: ${{ inputs.artifact-setup }}
+                  path: ${{ github.workspace }}/out-setup
 
             - name: 'Use cache'
               id: cache-setup
