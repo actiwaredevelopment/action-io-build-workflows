@@ -107,6 +107,14 @@ on:
                 required: false
                 type: string
                 default: ''
+            nuget-source-name:
+                description: 'Add additional nuget source name'
+                type: string
+                default: 'rebex'
+            nuget-source:
+                description: 'Add additional nuget source'
+                type: string
+                required: false
 
         secrets:
             action-user:
@@ -215,6 +223,11 @@ jobs:
             - name: Ensure GitHub NuGet Source
               run: |
                   dotnet nuget add source -u ${{ secrets.action-user }} -p ${{ secrets.action-token }} --store-password-in-clear-text --name github ${{ secrets.awdev-nuget-source }}
+
+            - name: Additional NuGet Source
+              if: ${{ inputs.nuget-source != '' }}
+              run: |
+                  dotnet nuget add source --name ${{ inputs.nuget-source-name }} ${{ inputs.nuget-source }}
 
             - name: Create npmrc
               run: |
