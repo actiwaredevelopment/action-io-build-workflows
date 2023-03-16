@@ -79,7 +79,7 @@ jobs:
             - name: Additional NuGet Source
               if: ${{ inputs.nuget-source != '' }}
               run: |
-                  dotnet nuget add source --name ${{ inputs.nuget-source-name }} ${{ inputs.nuget-source }}
+                  dotnet nuget add source --name ${{ inputs.nuget-source-name }} ${{ github.workspace }}${{ inputs.nuget-source }}
 
             - name: Ensure GitHub NuGet Source
               run: |
