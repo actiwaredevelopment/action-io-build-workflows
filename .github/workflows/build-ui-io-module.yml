@@ -109,3 +109,4 @@ jobs:
               with:
                   key: ${{ inputs.artifact-name }}-${{ github.sha }}
                   path: ${{ inputs.build-path }}
+                  enableCrossOsArchive: true

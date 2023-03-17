@@ -214,6 +214,8 @@ jobs:
               with:
                   key: ${{ inputs.module-artifact }}
                   path: ${{ inputs.module-artifact-path }}
+                  fail-on-cache-miss: true
+                  enableCrossOsArchive: true
 
             - name: Setup .NET
               uses: actions/setup-dotnet@v1
