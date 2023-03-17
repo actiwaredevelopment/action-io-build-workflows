@@ -67,7 +67,7 @@ jobs:
             cache-path: ${{ inputs.artifact-files }}
 
         steps:
-            - uses: actions/checkout@v1
+            - uses: actions/checkout@v3
               name: Checkout Code
 
             - uses: nuget/setup-nuget@v1
