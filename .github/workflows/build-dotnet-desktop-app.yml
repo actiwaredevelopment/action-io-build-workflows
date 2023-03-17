@@ -39,6 +39,16 @@ on:
                 required: false
                 type: string
                 default: ${{ github.workspace }}
+            repository: # id of input
+                description: 'The repository of the io module'
+                required: true
+                type: string
+                default: ${{ github.repository }}
+            branch:
+                description: 'The name of the branch that should be checkout'
+                required: false
+                type: string
+                default: ''
 
         secrets:
             action-user:
@@ -69,6 +79,9 @@ jobs:
         steps:
             - uses: actions/checkout@v3
               name: Checkout Code
+              with:
+                  repository: ${{ inputs.repository }}
+                  ref: ${{ inputs.branch }}
 
             - uses: nuget/setup-nuget@v1
               name: Setup NuGet
