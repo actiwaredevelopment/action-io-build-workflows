@@ -41,7 +41,7 @@ on:
                 default: ${{ github.workspace }}
             repository: # id of input
                 description: 'The repository of the io module'
-                required: true
+                required: false
                 type: string
                 default: ${{ github.repository }}
             branch:
