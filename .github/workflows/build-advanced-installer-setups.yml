@@ -118,6 +118,11 @@ on:
                 required: false
                 type: string
                 default: ${{ github.workspace }}
+            additional-cache-path:
+                description: 'Indication whether the cache should be used instead of artifacts'
+                required: false
+                type: string
+                default: ${{ github.workspace }}
             ignore-info-json:
                 description: 'Indicates if a info.json file should be used to determine the version'
                 required: false
@@ -192,7 +197,7 @@ jobs:
               with:
                   key: ${{ inputs.artifact-additional }}
                   restore-keys: ${{ inputs.artifact-additional }}
-                  path: ${{ github.workspace }}\src\setup
+                  path: ${{ inputs.additional-cache-path }}
                   fail-on-cache-miss: true
                   enableCrossOsArchive: true
 
