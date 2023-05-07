@@ -185,6 +185,17 @@ jobs:
                   fail-on-cache-miss: true
                   enableCrossOsArchive: true
 
+            - name: 'Download Additional Artifact'
+              if: ${{ inputs.use-cache == true && inputs.artifact-additional != '' }}
+              id: download-additional-cache
+              uses: actions/cache/restore@v3
+              with:
+                  key: ${{ inputs.artifact-additional }}
+                  restore-keys: ${{ inputs.artifact-additional }}
+                  path: ${{ github.workspace }}\src\setup
+                  fail-on-cache-miss: true
+                  enableCrossOsArchive: true
+
             - name: 'Extract web client'
               if: ${{ inputs.artifact-additional-command != '' }}
               run: ${{ inputs.artifact-additional-command }}
