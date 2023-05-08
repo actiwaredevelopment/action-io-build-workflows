@@ -239,7 +239,7 @@ jobs:
                   $pfxPath = Join-Path -Path $setupPath -ChildPath "cert.pfx";
                   $encodedBytes = [System.Convert]::FromBase64String($env:PFX_CONTENT);
                   Set-Content $pfxPath -Value $encodedBytes -AsByteStream;
-                  echo "PFX_PATH=$pfxPath" >> $GITHUB_OUTPUT;
+                  Write-Output "PFX_PATH=$($pfxPath)" >> $env:GITHUB_OUTPUT;
 
             - name: Build AIP
               uses: caphyon/advinst-github-action@v1.0
@@ -262,7 +262,7 @@ jobs:
                       SetVersion ${{ steps.module-version.outputs.version }}
 
             - name: Delete PFX certificate
-              if: ${{ inputs.sign-external != true }}
+              if: ${{ inputs.sign-external != true && steps.create-pfx.outputs.PFX_PATH != '' }}
               id: delete-pfx
               shell: pwsh
               env:
