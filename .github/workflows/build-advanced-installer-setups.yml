@@ -153,7 +153,7 @@ on:
 jobs:
     build-setup:
         name: 'Build Windows Setup'
-        runs-on: windows-setups
+        runs-on: windows-latest
 
         outputs:
             setup-cache-key: ${{ inputs.artifact-setup }}-${{ steps.module-version.outputs.versionNoBuild }}-${{ github.sha }}
