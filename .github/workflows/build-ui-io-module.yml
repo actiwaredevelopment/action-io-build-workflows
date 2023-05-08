@@ -103,6 +103,7 @@ jobs:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
                   NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
+                  NODE_OPTIONS: "--max_old_space_size=8192"
 
             - name: Add build to cache
               uses: actions/cache/save@v3
