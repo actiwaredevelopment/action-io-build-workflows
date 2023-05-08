@@ -112,7 +112,7 @@ on:
 jobs:
     build:
         name: build for nodejs
-        runs-on: ubuntu-latest-8-cores
+        runs-on: ubuntu-latest
 
         outputs:
             download: ${{ inputs.artifact-name }}-${{ github.sha }}
