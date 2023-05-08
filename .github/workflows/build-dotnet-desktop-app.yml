@@ -70,7 +70,7 @@ on:
 jobs:
     build:
         name: 'Build Desktop App'
-        runs-on: windows-setups
+        runs-on: windows-latest
 
         outputs:
             download: ${{ inputs.artifact-name }}-${{ github.sha }}
