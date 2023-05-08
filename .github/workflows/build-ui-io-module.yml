@@ -53,7 +53,7 @@ on:
 jobs:
     build:
         name: Build UI
-        runs-on: ubuntu-latest-8-cores
+        runs-on: ubuntu-latest
 
         outputs:
             cache-key: ${{ inputs.artifact-name }}-${{ github.sha }}
