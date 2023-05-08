@@ -244,7 +244,6 @@ jobs:
             - name: Build AIP
               uses: caphyon/advinst-github-action@v1.0
               with:
-                  advinst-version: '19.2'
                   advinst-license: ${{ secrets.aip-license }}
                   advinst-enable-automation: 'true'
                   aip-path: ${{ inputs.aip-file }}
