@@ -140,7 +140,7 @@ on:
 jobs:
     build:
         name: Build for ${{ inputs.rid }}
-        runs-on: ubuntu-latest-8-cores
+        runs-on: ubuntu-latest
 
         outputs:
             download: ${{ inputs.artifact-name }}-${{ github.sha }}
