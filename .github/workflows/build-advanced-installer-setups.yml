@@ -239,7 +239,7 @@ jobs:
                   $pfxPath = Join-Path -Path $setupPath -ChildPath "cert.pfx";
                   $encodedBytes = [System.Convert]::FromBase64String($env:PFX_CONTENT);
                   Set-Content $pfxPath -Value $encodedBytes -AsByteStream;
-                  Write-Output "::set-output name=PFX_PATH::$pfxPath";
+                  echo "PFX_PATH=$pfxPath" >> $GITHUB_OUTPUT;
 
             - name: Build AIP
               uses: caphyon/advinst-github-action@v1.0
