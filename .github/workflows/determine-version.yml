@@ -1,0 +1,137 @@
+name: 'Determine Version'
+
+on:
+    workflow_call:
+        inputs:
+            branch: # id of input
+                description: 'The name of the branch'
+                required: true
+                type: string
+                default: ''
+            default_version:
+                description: 'The default release version'
+                required: false
+                type: string
+                default: ''
+            type:
+                description: 'The release type'
+                required: false
+                default: 'prerelease/'
+                type: choice
+                options:
+                    - 'prerelease/'
+                    - 'hotfix/'
+
+        secrets:
+            access-key-id:
+                required: true
+            secret-access-key:
+                required: true
+
+        outputs:
+            version:
+                description: Returns the version from the branch name
+                value: ${{ jobs.version.outputs.version }}
+            setup-tag:
+                description: Returns the tag for setups like Pre-Release, Hotfix
+                value: ${{ jobs.version.outputs.setup-tag }}
+            docker-tag:
+                description: Returns the docker tag like prerelease, hotfix
+                value: ${{ jobs.version.outputs.docker-tag }}
+            build-version:
+                description: Returns the build version
+                value: ${{ jobs.version.outputs.build-version }}
+
+jobs:
+    version:
+        name: 'Determine Version'
+        runs-on: ubuntu-latest
+
+        outputs:
+            version: ${{ steps.version.outputs.result }}
+            setup-tag: ${{ steps.setup_tag.outputs.result }}
+            docker-tag: ${{ steps.docker_tag.outputs.result }}
+            build-version: ${{ steps.build.outputs.formattedTime }}
+
+        steps:
+            - name: Set Version
+              id: version
+              uses: actions/github-script@v6
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  result-encoding: string
+                  script: |
+                      let version = ''
+                      let branchName = '${{ inputs.branch }}'
+
+                      if (branchName == '') {
+                        branchName = '${{ inputs.type }}${{ inputs.default_version }}'
+                      }
+
+                      if (branchName.indexOf('prerelease') > -1) {
+                        version = branchName.replace(/refs\/heads\/prerelease\//gi, '')
+                      } else {
+                        version = branchName.replace(/refs\/heads\/hotfix\//gi, '')
+                      }
+
+                      if (version !== '' && version !== 'refs/heads/master') {
+                        return version
+                      }
+
+                      return '${{ inputs.default_version }}'
+
+            - name: Set Setup Tag
+              id: setup_tag
+              uses: actions/github-script@v6
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  result-encoding: string
+                  script: |
+                      let branchName = '${{ inputs.branch }}'
+
+                      if (branchName == '') {
+                        branchName = '${{ inputs.type }}${{ inputs.default_version }}'
+                      }
+
+                      if (branchName.indexOf('prerelease') > -1) {
+                        return 'Pre-Release'
+                      } else {
+                        return 'Hotfix'
+                      }
+
+                      return ''
+
+            - name: Set Docker Tag
+              id: docker_tag
+              uses: actions/github-script@v6
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  result-encoding: string
+                  script: |
+                      let branchName = '${{ inputs.branch }}'
+
+                      if (branchName == '') {
+                        branchName = '${{ inputs.type }}${{ inputs.default_version }}'
+                      }
+
+                      if (context.payload.ref.indexOf('prerelease') > -1) {
+                        return 'prerelease'
+                      } else {
+                        return 'hotfix'
+                      }
+
+                      return ''
+
+            - name: Get current date
+              id: build
+              uses: josStorer/get-current-time@v2
+              with:
+                  format: MMDD
+
+            - name: Log output
+              run: |
+                  echo "version: ${{ steps.version.outputs.result }}"
+                  echo "setup-tag: ${{ steps.setup_tag.outputs.result }}"
+                  echo "docker-tag: ${{ steps.docker_tag.outputs.result }}"
+                  echo "version: ${{ steps.version.outputs.result }}"
+                  build-version: ${{ steps.build.outputs.formattedTime }}
