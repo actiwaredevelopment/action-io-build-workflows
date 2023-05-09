@@ -69,9 +69,15 @@ jobs:
                       }
 
                       if (branchName.indexOf('prerelease') > -1) {
-                        version = branchName.replace(/refs\/heads\/prerelease\//gi, '')
-                      } else {
-                        version = branchName.replace(/refs\/heads\/hotfix\//gi, '')
+                        retrun branchName.replace(/refs\/heads\/prerelease-/gi, '').replace(/refs\/tags\/prerelease-/gi, '').replace(/prerelease-/gi, '').replace(/refs\/heads\/prerelease\//gi, '').replace(/refs\/tags\/prerelease\//gi, '').replace(/prerelease\//gi, '')
+                      } 
+
+                      if (branchName.indexOf('hotfix') > -1) {
+                        retrun branchName.replace(/refs\/heads\/hotfix-/gi, '').replace(/refs\/tags\/hotfix-/gi, '').replace(/hotfix-/gi, '').replace(/refs\/heads\/hotfix\//gi, '').replace(/refs\/tags\/hotfix\//gi, '').replace(/hotfix\//gi, '')
+                      }
+
+                      if (branchName.indexOf('release') > -1) {
+                        retrun branchName.replace(/refs\/heads\/release-/gi, '').replace(/refs\/tags\/release-/gi, '').replace(/release-/gi, '').replace(/refs\/heads\/release\//gi, '').replace(/refs\/tags\/release\//gi, '').replace(/release\//gi, '')
                       }
 
                       if (version !== '' && version !== 'refs/heads/master') {
@@ -95,7 +101,9 @@ jobs:
 
                       if (branchName.indexOf('prerelease') > -1) {
                         return 'Pre-Release'
-                      } else {
+                      } 
+
+                      if (branchName.indexOf('hotfix') > -1) {
                         return 'Hotfix'
                       }
 
@@ -114,10 +122,20 @@ jobs:
                         branchName = '${{ inputs.type }}${{ inputs.default_version }}'
                       }
 
-                      if (context.payload.ref.indexOf('prerelease') > -1) {
+                      if (branchName.indexOf('prerelease') > -1) {
                         return 'prerelease'
-                      } else {
+                      } 
+
+                      if (branchName.indexOf('hotfix') > -1) {
                         return 'hotfix'
+                      }
+
+                      if (branchName.indexOf('release') > -1) {
+                        let version = branchName.replace(/refs\/heads\/release-/gi, '').replace(/refs\/tags\/release-/gi, '').replace(/release-/gi, '').replace(/refs\/heads\/release\//gi, '').replace(/refs\/tags\/release\//gi, '').replace(/release\//gi, '')
+
+                        version = version.substring(0, version.indexOf('.') - 1);
+
+                        return = `${version}-latest`
                       }
 
                       return ''
@@ -134,4 +152,4 @@ jobs:
                   echo "setup-tag: ${{ steps.setup_tag.outputs.result }}"
                   echo "docker-tag: ${{ steps.docker_tag.outputs.result }}"
                   echo "version: ${{ steps.version.outputs.result }}"
-                  build-version: ${{ steps.build.outputs.formattedTime }}
+                  echo "build-version: ${{ steps.build.outputs.formattedTime }}"
