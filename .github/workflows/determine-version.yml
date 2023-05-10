@@ -17,10 +17,7 @@ on:
                 description: 'The release type'
                 required: false
                 default: 'prerelease/'
-                type: choice
-                options:
-                    - 'prerelease/'
-                    - 'hotfix/'
+                type: string
 
         secrets:
             access-key-id:
