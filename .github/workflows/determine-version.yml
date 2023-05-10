@@ -60,15 +60,15 @@ jobs:
                       }
 
                       if (branchName.indexOf('prerelease') > -1) {
-                        retrun branchName.replace(/refs\/heads\/prerelease-/gi, '').replace(/refs\/tags\/prerelease-/gi, '').replace(/prerelease-/gi, '').replace(/refs\/heads\/prerelease\//gi, '').replace(/refs\/tags\/prerelease\//gi, '').replace(/prerelease\//gi, '')
+                        return branchName.replace(/refs\/heads\/prerelease-/gi, '').replace(/refs\/tags\/prerelease-/gi, '').replace(/prerelease-/gi, '').replace(/refs\/heads\/prerelease\//gi, '').replace(/refs\/tags\/prerelease\//gi, '').replace(/prerelease\//gi, '')
                       } 
 
                       if (branchName.indexOf('hotfix') > -1) {
-                        retrun branchName.replace(/refs\/heads\/hotfix-/gi, '').replace(/refs\/tags\/hotfix-/gi, '').replace(/hotfix-/gi, '').replace(/refs\/heads\/hotfix\//gi, '').replace(/refs\/tags\/hotfix\//gi, '').replace(/hotfix\//gi, '')
+                        return branchName.replace(/refs\/heads\/hotfix-/gi, '').replace(/refs\/tags\/hotfix-/gi, '').replace(/hotfix-/gi, '').replace(/refs\/heads\/hotfix\//gi, '').replace(/refs\/tags\/hotfix\//gi, '').replace(/hotfix\//gi, '')
                       }
 
                       if (branchName.indexOf('release') > -1) {
-                        retrun branchName.replace(/refs\/heads\/release-/gi, '').replace(/refs\/tags\/release-/gi, '').replace(/release-/gi, '').replace(/refs\/heads\/release\//gi, '').replace(/refs\/tags\/release\//gi, '').replace(/release\//gi, '')
+                        return branchName.replace(/refs\/heads\/release-/gi, '').replace(/refs\/tags\/release-/gi, '').replace(/release-/gi, '').replace(/refs\/heads\/release\//gi, '').replace(/refs\/tags\/release\//gi, '').replace(/release\//gi, '')
                       }
 
                       if (version !== '' && version !== 'refs/heads/master') {
