@@ -19,12 +19,6 @@ on:
                 default: 'prerelease/'
                 type: string
 
-        secrets:
-            access-key-id:
-                required: true
-            secret-access-key:
-                required: true
-
         outputs:
             version:
                 description: Returns the version from the branch name
