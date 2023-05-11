@@ -126,7 +126,7 @@ jobs:
 
                         version = version.substring(0, version.indexOf('.') - 1);
 
-                        return = `${version}-latest`
+                        return `${version}-latest`
                       }
 
                       return ''
