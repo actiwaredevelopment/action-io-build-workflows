@@ -97,6 +97,16 @@ jobs:
                       if (branchName.indexOf('hotfix') > -1) {
                         return 'Hotfix'
                       }
+                      
+                      branchName = '${{ inputs.type }}${{ inputs.default_version }}'
+                      
+                      if (branchName.indexOf('prerelease') > -1) {
+                        return 'Pre-Release'
+                      } 
+
+                      if (branchName.indexOf('hotfix') > -1) {
+                        return 'Hotfix'
+                      }
 
                       return ''
 
@@ -127,6 +137,16 @@ jobs:
                         version = version.substring(0, version.indexOf('.') - 1);
 
                         return `${version}-latest`
+                      }
+
+                      branchName = '${{ inputs.type }}${{ inputs.default_version }}'
+                      
+                      if (branchName.indexOf('prerelease') > -1) {
+                        return 'prerelease'
+                      } 
+
+                      if (branchName.indexOf('hotfix') > -1) {
+                        return 'hotfix'
                       }
 
                       return ''
