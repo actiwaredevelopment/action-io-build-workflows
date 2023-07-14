@@ -80,12 +80,6 @@ jobs:
                     fi
                   fi
 
-            - name: 'Create version information'
-              uses: finnp/create-file-action@master
-              env:
-                  FILE_NAME: ${{ inputs.src-path }}/public/version.txt
-                  FILE_DATA: '${{ inputs.version }}'
-
             - uses: actions/setup-node@v3
               with:
                   always-auth: true
@@ -115,6 +109,12 @@ jobs:
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
                   NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
                   NODE_OPTIONS: '--max_old_space_size=8192'
+
+            - name: 'Create version information'
+              uses: finnp/create-file-action@master
+              env:
+                  FILE_NAME: ${{ inputs.src-path }}/build/version.txt
+                  FILE_DATA: '${{ inputs.version }}'
 
             - name: Add build to cache
               uses: actions/cache/save@v3
