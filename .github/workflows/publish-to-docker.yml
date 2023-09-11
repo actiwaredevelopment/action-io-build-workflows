@@ -101,7 +101,7 @@ jobs:
               with:
                   context: .
                   tags: ${{ inputs.image-name }}:${{ inputs.image-tag }}
-                  remove-tags: ${{ inputs.remove-tags }}
+                  remove-tags: ${{ inputs.image-name }}:${{ inputs.remove-tags }}
                   force-remove: ${{ inputs.force-remove }}
                   file: ${{ inputs.dockerfile }}
                   push: true
