@@ -28,6 +28,11 @@ on:
                 required: false
                 type: string
                 default: 'developer'
+            dockerfile:
+                description: 'The name of the tag that should be removed'
+                required: false
+                type: string
+                default: 'dockerfile'
 
         secrets:
             token:
@@ -71,4 +76,4 @@ jobs:
                   # Where should GitHub Docker find the Dockerfile, relative to the root of the repository.
                   # context:
                   # What Dockerfile should GitHub Docker be using when building. Defaults to traditional Dockerfile name.
-                  contextName: dockerfile
+                  contextName: ${{ inputs.dockerfile }}
