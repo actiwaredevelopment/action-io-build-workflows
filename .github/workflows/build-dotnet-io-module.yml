@@ -142,6 +142,10 @@ on:
                 description: Return the paths of the cache
                 value: ${{ jobs.build.outputs.cache-path }}
 
+            cache-additional-path:
+                description: Return the paths of the cache with additional path
+                value: ${{ jobs.build.outputs.cache-additional-path }}
+
 jobs:
     build:
         name: Build for ${{ inputs.rid }}
@@ -155,6 +159,16 @@ jobs:
                 ${{ inputs.ui-build-path }}
                 ${{ inputs.module-languages }}
                 ${{ inputs.module-aip-setup }}
+                ./dockerfile
+                ./version.txt
+                ./out
+            cache-additional-path: |
+                ${{ github.workspace }}/${{ inputs.modulefile }}
+                ${{ inputs.module-info-json }}
+                ${{ inputs.ui-build-path }}
+                ${{ inputs.module-languages }}
+                ${{ inputs.module-aip-setup }}
+                ${{ inputs.additional-path }}
                 ./dockerfile
                 ./version.txt
                 ./out
