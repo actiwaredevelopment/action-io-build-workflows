@@ -306,7 +306,7 @@ jobs:
                   echo "./out"
                   echo "::endgroup::"
 
-            - name: Add follow items to artifact
+            - name: Add follow items to artifact with addtional path
               if: inputs.additional-path != ''
               run: |
                   echo "::group::Added files to artifact"
@@ -337,7 +337,7 @@ jobs:
                       ./out
                   retention-days: 1
 
-            - name: 'Upload the Publish Artifact'
+            - name: 'Upload the Publish Artifact with addtional path'
               uses: actions/upload-artifact@v2.2.2
               if: inputs.additional-path 1= '' && inputs.use-cache == false
               with:
@@ -370,7 +370,7 @@ jobs:
                       ./out
                   enableCrossOsArchive: true
 
-            - name: 'Upload to cache'
+            - name: 'Upload to cache with addtional path'
               if: inputs.additional-path != '' && inputs.use-cache == true
               uses: actions/cache/save@v3
               with:
