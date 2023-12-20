@@ -62,6 +62,11 @@ on:
                 required: false
                 type: string
                 default: './src/configuration/build'
+            additional-path:
+                description: 'Enter where addtional pathes should be added to the artifact.'
+                required: false
+                type: string
+                default: ''                
             dockerfile:
                 description: 'The name of the docker file that should be added to the download'
                 required: false
@@ -288,6 +293,7 @@ jobs:
                   FILE_DATA: '${{ steps.module-version.outputs.version }}${{ inputs.version-postfix }}'
 
             - name: Add follow items to artifact
+              if: inputs.additional-path == ''
               run: |
                   echo "::group::Added files to artifact"
                   echo "${{ github.workspace }}/${{ inputs.modulefile }}"
@@ -300,9 +306,24 @@ jobs:
                   echo "./out"
                   echo "::endgroup::"
 
+            - name: Add follow items to artifact
+              if: inputs.additional-path != ''
+              run: |
+                  echo "::group::Added files to artifact"
+                  echo "${{ github.workspace }}/${{ inputs.modulefile }}"
+                  echo "${{ inputs.module-info-json }}"
+                  echo "${{ inputs.module-languages }}"
+                  echo "${{ inputs.module-aip-setup }}"
+                  echo "${{ inputs.ui-build-path }}"
+                  echo "${{ inputs.additional-path }}"
+                  echo "./dockerfile"
+                  echo "./version.txt"
+                  echo "./out"
+                  echo "::endgroup::"
+                  
             - name: 'Upload the Publish Artifact'
               uses: actions/upload-artifact@v2.2.2
-              if: inputs.use-cache == false
+              if: inputs.additional-path == '' && inputs.use-cache == false
               with:
                   name: ${{ inputs.artifact-name }}
                   path: |
@@ -316,8 +337,25 @@ jobs:
                       ./out
                   retention-days: 1
 
+            - name: 'Upload the Publish Artifact'
+              uses: actions/upload-artifact@v2.2.2
+              if: inputs.additional-path 1= '' && inputs.use-cache == false
+              with:
+                  name: ${{ inputs.artifact-name }}
+                  path: |
+                      ${{ github.workspace }}/${{ inputs.modulefile }}
+                      ${{ inputs.module-info-json }}
+                      ${{ inputs.ui-build-path }}
+                      ${{ inputs.module-languages }}
+                      ${{ inputs.module-aip-setup }}
+                      ${{ inputs.additional-path }}
+                      ./dockerfile
+                      ./version.txt
+                      ./out
+                  retention-days: 1
+                  
             - name: 'Upload to cache'
-              if: inputs.use-cache == true
+              if: inputs.additional-path == '' && inputs.use-cache == true
               uses: actions/cache/save@v3
               with:
                   key: ${{ inputs.artifact-name }}-${{ github.sha }}
@@ -327,6 +365,23 @@ jobs:
                       ${{ inputs.ui-build-path }}
                       ${{ inputs.module-languages }}
                       ${{ inputs.module-aip-setup }}
+                      ./dockerfile
+                      ./version.txt
+                      ./out
+                  enableCrossOsArchive: true
+
+            - name: 'Upload to cache'
+              if: inputs.additional-path != '' && inputs.use-cache == true
+              uses: actions/cache/save@v3
+              with:
+                  key: ${{ inputs.artifact-name }}-${{ github.sha }}
+                  path: |
+                      ${{ github.workspace }}/${{ inputs.modulefile }}
+                      ${{ inputs.module-info-json }}
+                      ${{ inputs.ui-build-path }}
+                      ${{ inputs.module-languages }}
+                      ${{ inputs.module-aip-setup }}
+                      ${{ inputs.additional-path }}
                       ./dockerfile
                       ./version.txt
                       ./out
