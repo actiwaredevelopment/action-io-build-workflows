@@ -339,7 +339,7 @@ jobs:
 
             - name: 'Upload the Publish Artifact with addtional path'
               uses: actions/upload-artifact@v2.2.2
-              if: inputs.additional-path 1= '' && inputs.use-cache == false
+              if: inputs.additional-path != '' && inputs.use-cache == false
               with:
                   name: ${{ inputs.artifact-name }}
                   path: |
