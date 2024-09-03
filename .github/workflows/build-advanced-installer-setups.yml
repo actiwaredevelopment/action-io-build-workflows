@@ -167,7 +167,7 @@ jobs:
             - name: 'Download Artifact'
               id: download
               if: inputs.use-cache == false
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4.1.7
               with:
                   name: ${{ inputs.artifact }}
                   path: ${{ github.workspace }}\src\setup
@@ -175,7 +175,7 @@ jobs:
             - name: 'Download Additional Artifact'
               if: ${{ inputs.use-cache == false && inputs.artifact-additional != '' }}
               id: download-additional
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4.1.7
               with:
                   name: ${{ inputs.artifact-additional }}
                   path: ${{ github.workspace }}\src\setup
@@ -308,7 +308,7 @@ jobs:
             - name: 'Download Artifact'
               id: download-setup
               if: inputs.use-cache == false
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4.1.7
               with:
                   name: ${{ inputs.artifact-setup }}
                   path: ${{ github.workspace }}/out-setup

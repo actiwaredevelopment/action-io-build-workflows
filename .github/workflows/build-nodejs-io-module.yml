@@ -211,7 +211,7 @@ jobs:
 
             - name: Download additional files for module
               if: inputs.use-cache == false && inputs.module-artifact != ''
-              uses: actions/download-artifact@v2
+              uses: actions/download-artifact@v4.1.7
               with:
                   name: ${{ inputs.module-artifact }}
                   path: ${{ inputs.module-artifact-path }}
