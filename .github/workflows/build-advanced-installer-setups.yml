@@ -283,7 +283,7 @@ jobs:
 
             - name: Publish setup artifact
               if: inputs.use-cache == false
-              uses: actions/upload-artifact@v2
+              uses: actions/upload-artifact@v4
               with:
                   name: ${{ inputs.artifact-setup }}
                   path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ steps.module-version.outputs.versionNoBuild }}.exe
@@ -308,7 +308,7 @@ jobs:
             - name: 'Download Artifact'
               id: download-setup
               if: inputs.use-cache == false
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               with:
                   name: ${{ inputs.artifact-setup }}
                   path: ${{ github.workspace }}/out-setup
