@@ -164,7 +164,7 @@ jobs:
             - name: Display structure of downloaded files
               run: ls -a
 
-            - uses: actions/setup-node@v2
+            - uses: actions/setup-node@v4
               with:
                   always-auth: true
                   registry-url: 'https://npm.pkg.github.com'
@@ -211,14 +211,14 @@ jobs:
 
             - name: Download additional files for module
               if: inputs.use-cache == false && inputs.module-artifact != ''
-              uses: actions/download-artifact@v2
+              uses: actions/download-artifact@v4
               with:
                   name: ${{ inputs.module-artifact }}
                   path: ${{ inputs.module-artifact-path }}
 
             - name: Download additional files for module
               if: inputs.use-cache == true && inputs.module-artifact != ''
-              uses: actions/cache/restore@v3
+              uses: actions/cache/restore@v4
               with:
                   key: ${{ inputs.module-artifact }}
                   restore-keys: ${{ inputs.module-artifact }}
@@ -259,7 +259,7 @@ jobs:
                   echo "::endgroup::"
 
             - name: 'Upload the Publish Artifact'
-              uses: actions/upload-artifact@v2.2.2
+              uses: actions/upload-artifact@v4
               if: inputs.use-cache == false
               with:
                   name: ${{ inputs.artifact-name }}
@@ -277,7 +277,7 @@ jobs:
                   retention-days: 1
 
             - name: 'Upload to the cache'
-              uses: actions/cache/save@v3
+              uses: actions/cache/save@v4
               if: inputs.use-cache == true
               with:
                   key: ${{ inputs.artifact-name }}-${{ github.sha }}

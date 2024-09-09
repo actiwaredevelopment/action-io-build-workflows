@@ -77,7 +77,7 @@ jobs:
             cache-path: ${{ inputs.artifact-files }}
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
               name: Checkout Code
               with:
                   repository: ${{ inputs.repository }}
@@ -113,7 +113,7 @@ jobs:
 
             - name: 'Upload the Publish Artifact'
               if: inputs.use-cache == true
-              uses: actions/cache/save@v3
+              uses: actions/cache/save@v4
               with:
                   key: ${{ inputs.artifact-name }}-${{ github.sha }}
                   path: ${{ inputs.artifact-files }}

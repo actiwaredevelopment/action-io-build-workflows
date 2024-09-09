@@ -1,47 +1,47 @@
 name: Publish to ftp
 
 on:
-  workflow_call:
-    inputs:
-      artifact:  # id of input
-        description: 'The name of the artifact'
-        required: true
-        type: string
-        default: ''
-      remote-dir:
-        description: 'The ftp remote dir'
-        required: true
-        type: string
-        default: '/Development/actiwareio/Source/Modules/v2/Template/'
+    workflow_call:
+        inputs:
+            artifact: # id of input
+                description: 'The name of the artifact'
+                required: true
+                type: string
+                default: ''
+            remote-dir:
+                description: 'The ftp remote dir'
+                required: true
+                type: string
+                default: '/Development/actiwareio/Source/Modules/v2/Template/'
 
-    secrets:
-      address:
-        required: true
-      user:
-        required: true
-      password:
-        required: true
+        secrets:
+            address:
+                required: true
+            user:
+                required: true
+            password:
+                required: true
 
 jobs:
-  ftp-deployment:
-    name: publish to ftp server
-    runs-on: ubuntu-latest
+    ftp-deployment:
+        name: publish to ftp server
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: 'Download Artifact'
-        uses: actions/download-artifact@v2
-        with: 
-          name: ${{ inputs.artifact }}
-          path: ./download/actiware
+        steps:
+            - name: 'Download Artifact'
+              uses: actions/download-artifact@v4
+              with:
+                  name: ${{ inputs.artifact }}
+                  path: ./download/actiware
 
-      - name: FTP Deployment
-        uses: sebastianpopp/ftp-action@v2.0.0
-        with:
-          localDir: ./download/actiware/
-          remoteDir: ${{ inputs.remote-dir }}
-          # Deployment destination server & path. Formatted as protocol://domain.com:port/full/destination/path/
-          host: ${{ secrets.address }}
-          # FTP account username
-          user: ${{ secrets.user }}
-          # FTP account password
-          password: ${{ secrets.password }}
+            - name: FTP Deployment
+              uses: sebastianpopp/ftp-action@v2.0.0
+              with:
+                  localDir: ./download/actiware/
+                  remoteDir: ${{ inputs.remote-dir }}
+                  # Deployment destination server & path. Formatted as protocol://domain.com:port/full/destination/path/
+                  host: ${{ secrets.address }}
+                  # FTP account username
+                  user: ${{ secrets.user }}
+                  # FTP account password
+                  password: ${{ secrets.password }}

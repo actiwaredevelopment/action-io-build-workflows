@@ -62,13 +62,13 @@ jobs:
         steps:
             - name: 'Download Artifact'
               if: inputs.use-cache == false
-              uses: actions/download-artifact@v2
+              uses: actions/download-artifact@v4
               with:
                   name: ${{ inputs.artifact }}
 
             - name: 'Use cache'
               if: inputs.use-cache == true
-              uses: actions/cache/restore@v3
+              uses: actions/cache/restore@v4
               with:
                   key: ${{ inputs.artifact }}
                   restore-keys: ${{ inputs.artifact }}

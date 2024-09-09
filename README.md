@@ -55,7 +55,7 @@ jobs:
 
     steps:
       - name: "Download Artifact"
-        uses: actions/download-artifact@v2.0.8
+        uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build.outputs.downloads }}
 ```
@@ -92,7 +92,7 @@ jobs:
 
     steps:
       - name: "Download Artifact"
-        uses: actions/download-artifact@v2.0.8
+        uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build-windows.outputs.downloads }}
 ```
@@ -129,7 +129,7 @@ jobs:
 
     steps:
       - name: "Download Artifact"
-        uses: actions/download-artifact@v2.0.8
+        uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build.outputs.downloads }}
 ```
@@ -167,7 +167,7 @@ jobs:
 
     steps:
       - name: "Download Artifact"
-        uses: actions/download-artifact@v2.0.8
+        uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build.outputs.downloads }}
 ```
@@ -205,7 +205,7 @@ jobs:
 
     steps:
       - name: "Download Artifact"
-        uses: actions/download-artifact@v2.0.8
+        uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build-nodejs.outputs.downloads }}
 ```
@@ -241,7 +241,7 @@ jobs:
 
     steps:
       - name: "Download Artifact"
-        uses: actions/download-artifact@v2.0.8
+        uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build-nodejs.outputs.downloads }}
 ```
@@ -277,7 +277,7 @@ jobs:
 
     steps:
       - name: "Download Artifact"
-        uses: actions/download-artifact@v2.0.8
+        uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build-nodejs.outputs.downloads }}
 ```

@@ -1,34 +1,34 @@
 name: Test ftp upload
 
 on:
-  workflow_dispatch:
+    workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+    build:
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: 'Create version information'
-        uses: finnp/create-file-action@master
-        env:
-          FILE_NAME: './version.txt'
-          FILE_DATA: '0.0.0'
+        steps:
+            - name: 'Create version information'
+              uses: finnp/create-file-action@master
+              env:
+                  FILE_NAME: './version.txt'
+                  FILE_DATA: '0.0.0'
 
-      - name: 'Upload the Publish Artifact'
-        uses: actions/upload-artifact@v2.2.2
+            - name: 'Upload the Publish Artifact'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: TestData
+                  path: |
+                      ./version.txt
+                  retention-days: 1
+
+    ftp:
+        needs: build
+        uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/publish-to-ftp.yml@main
         with:
-          name: TestData
-          path: |
-            ./version.txt
-          retention-days: 1
-
-  ftp:
-    needs: build
-    uses: actiwaredevelopment/action-io-build-workflows/.github/workflows/publish-to-ftp.yml@main
-    with:
-      artifact: TestData
-      remote-dir: /Development/actiwareio/Source/Modules/v2/Template/
-    secrets:
-      address: ${{ secrets.SFTP_HOST }}:522
-      user: ${{ secrets.SFTP_USER }}
-      password: ${{ secrets.SFTP_PASSWORD }}
+            artifact: TestData
+            remote-dir: /Development/actiwareio/Source/Modules/v2/Template/
+        secrets:
+            address: ${{ secrets.SFTP_HOST }}:522
+            user: ${{ secrets.SFTP_USER }}
+            password: ${{ secrets.SFTP_PASSWORD }}

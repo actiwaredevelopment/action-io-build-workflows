@@ -177,7 +177,7 @@ jobs:
                   echo "${{ secrets.npmrc-config }}" > .npmrc
 
             - name: Set up Go
-              uses: actions/setup-go@v2
+              uses: actions/setup-go@v5
               with:
                   go-version: ${{ inputs.go-version }}
 
@@ -197,7 +197,7 @@ jobs:
 
             - name: Download additional files for module
               if: inputs.module-artifact != ''
-              uses: actions/download-artifact@v2
+              uses: actions/download-artifact@v4
               with:
                   name: ${{ inputs.module-artifact }}
                   path: ${{ inputs.module-artifact-path }}
@@ -235,7 +235,7 @@ jobs:
 
             - name: 'Upload the Publish Artifact'
               if: inputs.use-cache == false
-              uses: actions/upload-artifact@v2.2.2
+              uses: actions/upload-artifact@v4
               with:
                   name: ${{ inputs.artifact-name }}
                   path: |
@@ -250,7 +250,7 @@ jobs:
 
             - name: 'Upload the Publish Artifact'
               if: inputs.use-cache == true
-              uses: actions/cache/save@v3
+              uses: actions/cache/save@v4
               with:
                   key: ${{ inputs.artifact-name }}
                   path: |

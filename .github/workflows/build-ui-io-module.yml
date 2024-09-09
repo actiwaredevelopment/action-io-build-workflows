@@ -80,7 +80,7 @@ jobs:
                     fi
                   fi
 
-            - uses: actions/setup-node@v3
+            - uses: actions/setup-node@v4
               with:
                   always-auth: true
                   registry-url: 'https://npm.pkg.github.com'
@@ -117,7 +117,7 @@ jobs:
                   FILE_DATA: '${{ inputs.version }}'
 
             - name: Add build to cache
-              uses: actions/cache/save@v3
+              uses: actions/cache/save@v4
               with:
                   key: ${{ inputs.artifact-name }}-${{ github.sha }}
                   path: ${{ inputs.build-path }}

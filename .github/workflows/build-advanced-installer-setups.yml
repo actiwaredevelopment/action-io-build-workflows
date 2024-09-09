@@ -162,12 +162,12 @@ jobs:
 
         steps:
             - name: Check out repository code
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: 'Download Artifact'
               id: download
               if: inputs.use-cache == false
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               with:
                   name: ${{ inputs.artifact }}
                   path: ${{ github.workspace }}\src\setup
@@ -175,14 +175,14 @@ jobs:
             - name: 'Download Additional Artifact'
               if: ${{ inputs.use-cache == false && inputs.artifact-additional != '' }}
               id: download-additional
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               with:
                   name: ${{ inputs.artifact-additional }}
                   path: ${{ github.workspace }}\src\setup
 
             - name: 'Download from cache'
               if: inputs.use-cache == true
-              uses: actions/cache/restore@v3
+              uses: actions/cache/restore@v4
               with:
                   key: ${{ inputs.artifact }}
                   restore-keys: ${{ inputs.artifact }}
@@ -193,7 +193,7 @@ jobs:
             - name: 'Download Additional Artifact'
               if: ${{ inputs.use-cache == true && inputs.artifact-additional != '' }}
               id: download-additional-cache
-              uses: actions/cache/restore@v3
+              uses: actions/cache/restore@v4
               with:
                   key: ${{ inputs.artifact-additional }}
                   restore-keys: ${{ inputs.artifact-additional }}
@@ -290,7 +290,7 @@ jobs:
 
             - name: Publish setup artifact to cache
               if: inputs.use-cache == true
-              uses: actions/cache/save@v3
+              uses: actions/cache/save@v4
               with:
                   key: ${{ inputs.artifact-setup }}-${{ steps.module-version.outputs.versionNoBuild }}-${{ github.sha }}
                   path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ steps.module-version.outputs.versionNoBuild }}.exe
@@ -303,7 +303,7 @@ jobs:
 
         steps:
             - name: Check out repository code
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: 'Download Artifact'
               id: download-setup
@@ -316,7 +316,7 @@ jobs:
             - name: 'Use cache'
               id: cache-setup
               if: inputs.use-cache == true
-              uses: actions/cache/restore@v3
+              uses: actions/cache/restore@v4
               with:
                   key: ${{ needs.build-setup.outputs.setup-cache-key }}
                   restore-keys: ${{ needs.build-setup.outputs.setup-cache-key }}
