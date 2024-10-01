@@ -256,6 +256,7 @@ jobs:
                       SetProperty OemPartner="${{ inputs.partner }}"
                       SetProperty OemBranding="${{ inputs.branding }}"
                       SetProperty OemMajorRelease="${{ inputs.major-version }}"
+                      SetProperty BaseOemVersion="${{ steps.module-version.outputs.version }}"
                       SetProperty ServiceName="${{ inputs.service-name }}"
                       SetProperty SetupName="${{ inputs.setup-name }}"
                       SetProperty DEFAULT_DB="${{ inputs.setup-default-db }}"
