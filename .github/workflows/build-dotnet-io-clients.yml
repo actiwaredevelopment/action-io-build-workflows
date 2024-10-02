@@ -223,7 +223,7 @@ jobs:
                   enableCrossOsArchive: true
 
             - name: Display structure of downloaded files
-              run: Get-ChildItem -Recurse
+              run: ls -laR1
 
             - name: Setup .NET
               uses: actions/setup-dotnet@v4
