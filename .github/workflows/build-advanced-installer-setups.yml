@@ -53,6 +53,11 @@ on:
                 required: false
                 type: string
                 default: ''
+            patch-level:
+                description: 'The patch level of the product'
+                required: false
+                type: string
+                default: ''
             build-version:
                 description: 'The build version'
                 required: false
@@ -257,6 +262,10 @@ jobs:
                       SetProperty OemBranding="${{ inputs.branding }}"
                       SetProperty OemMajorRelease="${{ inputs.major-version }}"
                       SetProperty BaseOemVersion="${{ steps.module-version.outputs.version }}"
+                      SetProperty MajorVersion="${{ inputs.major-version }}"
+                      SetProperty MinorVersion="${{ inputs.minor-version }}"
+                      SetProperty PatchLevel="${{ inputs.patch-level }}"
+                      SetProperty BuildVersion="${{ inputs.build-version }}"
                       SetProperty ServiceName="${{ inputs.service-name }}"
                       SetProperty SetupName="${{ inputs.setup-name }}"
                       SetProperty DEFAULT_DB="${{ inputs.setup-default-db }}"

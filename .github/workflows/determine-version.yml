@@ -29,6 +29,15 @@ on:
             docker-tag:
                 description: Returns the docker tag like prerelease, hotfix
                 value: ${{ jobs.version.outputs.docker-tag }}
+            major-version:
+                description: Returns the major version
+                value: ${{ jobs.version.outputs.major-version }}
+            minor-version:
+                description: Returns the minor version
+                value: ${{ jobs.version.outputs.minor-version }}
+            patch-level:
+                description: Returns the patch version
+                value: ${{ jobs.version.outputs.patch-level }}
             build-version:
                 description: Returns the build version
                 value: ${{ jobs.version.outputs.build-version }}
@@ -42,6 +51,9 @@ jobs:
             version: ${{ steps.version.outputs.result }}
             setup-tag: ${{ steps.setup_tag.outputs.result }}
             docker-tag: ${{ steps.docker_tag.outputs.result }}
+            major-version: ${{ steps.version_numbers.outputs.major }}
+            minor-version: ${{ steps.version_numbers.outputs.minor }}
+            patch-level: ${{ steps.version_numbers.outputs.patch }}
             build-version: ${{ steps.build.outputs.formattedTime }}
 
         steps:
@@ -76,6 +88,24 @@ jobs:
                       }
 
                       return '${{ inputs.default_version }}'
+
+            - name: Set Version Numbers
+              id: version_numbers
+              uses: actions/github-script@v7
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  result-encoding: string
+                  script: |
+                      const version = '1.0.0';
+                      const [major, minor, patch] = version.split('.');
+
+                      console.log(`Major: ${major}`);
+                      console.log(`Minor: ${minor}`);
+                      console.log(`Patch: ${patch}`);
+
+                      core.setOutput('major', major);
+                      core.setOutput('minor', minor);
+                      core.setOutput('patch', patch);
 
             - name: Set Setup Tag
               id: setup_tag
@@ -163,4 +193,7 @@ jobs:
                   echo "setup-tag: ${{ steps.setup_tag.outputs.result }}"
                   echo "docker-tag: ${{ steps.docker_tag.outputs.result }}"
                   echo "version: ${{ steps.version.outputs.result }}"
+                  echo "major-version: ${{ steps.version_numbers.outputs.major }}"
+                  echo "minor-version: ${{ steps.version_numbers.outputs.minor }}"
+                  echo "patch-level: ${{ steps.version_numbers.outputs.patch }}"
                   echo "build-version: ${{ steps.build.outputs.formattedTime }}"
