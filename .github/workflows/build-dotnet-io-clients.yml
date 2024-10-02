@@ -195,9 +195,6 @@ jobs:
 
                   mv ${{ inputs.dockerfile }} ./dockerfile
 
-            - name: Display structure of downloaded files
-              run: ls -a
-
             - name: Restore ui build output
               if: ${{ inputs.use-cache == true && inputs.ui-build-cache-key != '' }}
               uses: actions/cache/restore@v4
@@ -224,6 +221,9 @@ jobs:
                   path: ${{ inputs.module-artifact-path }}
                   fail-on-cache-miss: true
                   enableCrossOsArchive: true
+
+            - name: Display structure of downloaded files
+              run: Get-ChildItem -Recurse
 
             - name: Setup .NET
               uses: actions/setup-dotnet@v4
