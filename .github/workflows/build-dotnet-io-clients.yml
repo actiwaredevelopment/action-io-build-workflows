@@ -121,10 +121,25 @@ on:
                 required: false
                 default: false
             publish-trimmed:
-                description: 'Use native aot Compiler'
+                description: 'Trims unused libraries to reduce the deployment size of an app when publishing a self-contained executable'
                 type: boolean
                 required: false
                 default: false
+            publish-single-file:
+                description: 'Packages the app into a platform-specific single-file executable'
+                type: boolean
+                required: false
+                default: false
+            publish-ready-to-run:
+                description: 'Compiles application assemblies as ReadyToRun (R2R) format'
+                type: boolean
+                required: false
+                default: false
+            include-native-libraries-in-single-file:
+                description: 'Include all native libraries in single file'
+                type: boolean
+                required: false
+                default: true
 
         secrets:
             action-user:
@@ -280,7 +295,7 @@ jobs:
             - name: Build and publish single file
               if: ${{ inputs.create-single-file == true && inputs.publish-aot == true && inputs.dotnet-version != '6.0.x' }}
               run: |
-                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:PublishReadyToRun=true -p:PublishTrimmed:${{ inputs.publish-trimmed }} -p:PublishAot:${{ inputs.publish-aot }} -p:EnableCompressionInSingleFile=true -p:Version=${{ inputs.product-version }} --self-contained true -o out --force
+                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=${{ inputs.publish-single-file }} -p:IncludeNativeLibrariesInSingleFile=true -p:PublishReadyToRun=${{ inputs.publish-ready-to-run }} -p:PublishTrimmed:${{ inputs.publish-trimmed }} -p:PublishAot:${{ inputs.publish-aot }} -p:Version=${{ inputs.product-version }} --self-contained true -o out --force
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
