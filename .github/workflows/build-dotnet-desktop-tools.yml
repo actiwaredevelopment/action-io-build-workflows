@@ -91,6 +91,13 @@ on:
                 type: string
                 required: false
                 default: ''
+            chosen-os:
+                description: 'Choose the operating system for the build'
+                type: choice
+                options:
+                    - ubuntu-latest
+                    - windows-latest
+                default: windows-latest
 
         secrets:
             action-user:
@@ -119,8 +126,8 @@ on:
 
 jobs:
     build:
-        name: 'Build Desktop App'
-        runs-on: windows-latest
+        name: 'Build .NET desktop app on ${{ inputs.chosen-os }}'
+        runs-on: ${{ inputs.chosen-os }}
 
         outputs:
             download: ${{ inputs.artifact-name }}-${{ github.sha }}
