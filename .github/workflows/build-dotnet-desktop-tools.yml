@@ -58,11 +58,6 @@ on:
                 required: false
                 type: string
                 default: '0.0.0'
-            version-postfix:
-                description: 'A postfix for the determined version'
-                required: false
-                type: string
-                default: ''
             use-cache:
                 description: 'Indication whether the cache should be used instead of artifacts'
                 required: false
@@ -150,6 +145,7 @@ jobs:
                   echo "Set the inputs variable create-single-file to ${{ inputs.create-single-file }}"
                   echo "Set the inputs variable rid to ${{ inputs.rid }}"
                   echo "Set the inputs variable artifact-name to ${{ inputs.artifact-name }}"
+                  echo "Set the inputs variable own-build-command to ${{ inputs.own-build-command }}"
                   echo "::endgroup::"
 
             - name: Checkout repository
@@ -207,7 +203,7 @@ jobs:
                   NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
 
             - name: Build and publish single file
-              if: ${{ inputs.own-build-command == '' && inputs.create-single-file == true && inputs.dotnet-version != '6.0.x' }}
+              if: ${{ inputs.own-build-command != '' && inputs.create-single-file == true && inputs.dotnet-version != '6.0.x' }}
               run: |
                   dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} ${{ inputs.own-build-command}} -o out --force
               env:
@@ -225,10 +221,8 @@ jobs:
                   NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
 
             - name: 'Create version information'
-              uses: finnp/create-file-action@master
-              env:
-                  FILE_NAME: './version.txt'
-                  FILE_DATA: '${{ inputs.version }}${{ inputs.version-postfix }}'
+              run: |
+                  echo "${{ inputs.version }}" > version.txt
 
             - name: Add follow items to artifact
               if: inputs.additional-path == ''
