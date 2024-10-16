@@ -23,11 +23,6 @@ on:
                 required: false
                 type: string
                 default: 'Release'
-            modulefile:
-                description: 'How to name the output file (ZIP archive) for the module'
-                required: true
-                type: string
-                default: 'module.zip'
             module-artifact:
                 description: 'If given, the artifact will be downloaded before zipping the module'
                 required: false
@@ -42,11 +37,6 @@ on:
                 required: false
                 type: string
                 default: './module-definition'
-            module-info-json:
-                description: 'Enter where to find the info.json for the module.'
-                required: false
-                type: string
-                default: './module-definition/info.json'
             module-languages:
                 description: 'Enter where to find the language files for the module.'
                 required: false
@@ -92,6 +82,11 @@ on:
                 required: false
                 type: string
                 default: ''
+            product-version:
+                description: 'The version of the product'
+                required: true
+                type: string
+                default: ''
             version-postfix:
                 description: 'A postfix for the determined version'
                 required: false
@@ -120,6 +115,31 @@ on:
                 description: 'Add additional nuget source'
                 type: string
                 required: false
+            publish-aot:
+                description: 'Use native aot Compiler'
+                type: boolean
+                required: false
+                default: false
+            publish-trimmed:
+                description: 'Trims unused libraries to reduce the deployment size of an app when publishing a self-contained executable'
+                type: boolean
+                required: false
+                default: false
+            publish-single-file:
+                description: 'Packages the app into a platform-specific single-file executable'
+                type: boolean
+                required: false
+                default: false
+            publish-ready-to-run:
+                description: 'Compiles application assemblies as ReadyToRun (R2R) format'
+                type: boolean
+                required: false
+                default: false
+            include-native-libraries-in-single-file:
+                description: 'Include all native libraries in single file'
+                type: boolean
+                required: false
+                default: true
 
         secrets:
             action-user:
@@ -154,8 +174,6 @@ jobs:
         outputs:
             download: ${{ inputs.artifact-name }}-${{ github.sha }}
             cache-path: |
-                ${{ github.workspace }}/${{ inputs.modulefile }}
-                ${{ inputs.module-info-json }}
                 ${{ inputs.ui-build-path }}
                 ${{ inputs.module-languages }}
                 ${{ inputs.module-aip-setup }}
@@ -163,8 +181,6 @@ jobs:
                 ./version.txt
                 ./out
             cache-additional-path: |
-                ${{ github.workspace }}/${{ inputs.modulefile }}
-                ${{ inputs.module-info-json }}
                 ${{ inputs.ui-build-path }}
                 ${{ inputs.module-languages }}
                 ${{ inputs.module-aip-setup }}
@@ -180,9 +196,7 @@ jobs:
                   echo "Set the inputs variable repository to ${{ inputs.repository }}"
                   echo "Set the inputs variable project to ${{ inputs.project }}"
                   echo "Set the inputs variable dotnet to ${{ inputs.dotnet-version }}"
-                  echo "Set the inputs variable modulefile to ${{ inputs.modulefile }}"
                   echo "Set the inputs variable module-source-path to ${{ inputs.module-source-path }}"
-                  echo "Set the inputs variable module-info-json to ${{ inputs.module-info-json }}"
                   echo "Set the inputs variable ui-build-path to ${{ inputs.ui-build-path }}"
                   echo "Set the inputs variable dockerfile to ${{ inputs.dockerfile }}"
                   echo "Set the inputs variable create-single-file to ${{ inputs.create-single-file }}"
@@ -254,12 +268,6 @@ jobs:
               run: |
                   echo "${{ secrets.npmrc-config }}" > .npmrc
 
-            - name: Get module version
-              id: module-version
-              uses: actiwaredevelopment/action-io-get-module-version@v0.1
-              with:
-                  module-definition-file: ${{ inputs.module-info-json }}
-
             - name: Restore dependencies
               run: dotnet restore ${{ inputs.project }}
 
@@ -267,18 +275,27 @@ jobs:
             #   run: dotnet build ${{ inputs.project }} --configuration ${{ inputs.dotnet-configuration }} --force
 
             - name: Build and publish single file
-              if: ${{ inputs.create-single-file == true && inputs.dotnet-version != '6.0.x' }}
+              if: ${{ inputs.create-single-file == true && inputs.publish-aot == false && inputs.dotnet-version != '6.0.x' }}
               run: |
-                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:Version=${{ steps.module-version.outputs.version }} --self-contained true -o out --force
+                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:Version=${{ inputs.product-version }} --self-contained true -o out --force
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
                   NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
 
             - name: Build and publish single file
-              if: ${{ inputs.create-single-file == true && inputs.dotnet-version == '6.0.x' }}
+              if: ${{ inputs.create-single-file == true && inputs.publish-aot == false && inputs.dotnet-version == '6.0.x' }}
               run: |
-                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:EnableCompressionInSingleFile=true -p:Version=${{ steps.module-version.outputs.version }} --self-contained true -o out --force
+                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:EnableCompressionInSingleFile=true -p:Version=${{ inputs.product-version }} --self-contained true -o out --force
+              env:
+                  npm_config_userconfig: '${{ github.workspace }}/.npmrc'
+                  npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
+                  NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
+
+            - name: Build and publish single file
+              if: ${{ inputs.create-single-file == true && inputs.publish-aot == true && inputs.dotnet-version != '6.0.x' }}
+              run: |
+                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=${{ inputs.publish-single-file }} -p:IncludeNativeLibrariesInSingleFile=true -p:PublishReadyToRun=${{ inputs.publish-ready-to-run }} -p:PublishTrimmed=${{ inputs.publish-trimmed }} -p:PublishAot=${{ inputs.publish-aot }} -p:Version=${{ inputs.product-version }} --self-contained true -o out --force
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
@@ -287,31 +304,22 @@ jobs:
             - name: Build and publish
               if: ${{ inputs.create-single-file == false }}
               run: |
-                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:Version=${{ steps.module-version.outputs.version }} --self-contained false -o out --force
+                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:Version=${{ inputs.product-version }} --self-contained false -o out --force
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
                   NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
 
-            - name: 'Create module definition file'
-              uses: vimtor/action-zip@v1
-              with:
-                  dest: ${{ inputs.modulefile }}
-                  files: ${{ inputs.module-source-path }}
-                  recursive: true
-
             - name: 'Create version information'
               uses: finnp/create-file-action@master
               env:
                   FILE_NAME: './version.txt'
-                  FILE_DATA: '${{ steps.module-version.outputs.version }}${{ inputs.version-postfix }}'
+                  FILE_DATA: '${{ inputs.product-version }}${{ inputs.version-postfix }}'
 
             - name: Add follow items to artifact
               if: inputs.additional-path == ''
               run: |
                   echo "::group::Added files to artifact"
-                  echo "${{ github.workspace }}/${{ inputs.modulefile }}"
-                  echo "${{ inputs.module-info-json }}"
                   echo "${{ inputs.module-languages }}"
                   echo "${{ inputs.module-aip-setup }}"
                   echo "${{ inputs.ui-build-path }}"
@@ -324,8 +332,6 @@ jobs:
               if: inputs.additional-path != ''
               run: |
                   echo "::group::Added files to artifact"
-                  echo "${{ github.workspace }}/${{ inputs.modulefile }}"
-                  echo "${{ inputs.module-info-json }}"
                   echo "${{ inputs.module-languages }}"
                   echo "${{ inputs.module-aip-setup }}"
                   echo "${{ inputs.ui-build-path }}"
@@ -341,8 +347,6 @@ jobs:
               with:
                   name: ${{ inputs.artifact-name }}
                   path: |
-                      ${{ github.workspace }}/${{ inputs.modulefile }}
-                      ${{ inputs.module-info-json }}
                       ${{ inputs.ui-build-path }}
                       ${{ inputs.module-languages }}
                       ${{ inputs.module-aip-setup }}
@@ -357,8 +361,6 @@ jobs:
               with:
                   name: ${{ inputs.artifact-name }}
                   path: |
-                      ${{ github.workspace }}/${{ inputs.modulefile }}
-                      ${{ inputs.module-info-json }}
                       ${{ inputs.ui-build-path }}
                       ${{ inputs.module-languages }}
                       ${{ inputs.module-aip-setup }}
@@ -374,8 +376,6 @@ jobs:
               with:
                   key: ${{ inputs.artifact-name }}-${{ github.sha }}
                   path: |
-                      ${{ github.workspace }}/${{ inputs.modulefile }}
-                      ${{ inputs.module-info-json }}
                       ${{ inputs.ui-build-path }}
                       ${{ inputs.module-languages }}
                       ${{ inputs.module-aip-setup }}
@@ -390,8 +390,6 @@ jobs:
               with:
                   key: ${{ inputs.artifact-name }}-${{ github.sha }}
                   path: |
-                      ${{ github.workspace }}/${{ inputs.modulefile }}
-                      ${{ inputs.module-info-json }}
                       ${{ inputs.ui-build-path }}
                       ${{ inputs.module-languages }}
                       ${{ inputs.module-aip-setup }}
