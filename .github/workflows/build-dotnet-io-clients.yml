@@ -115,31 +115,11 @@ on:
                 description: 'Add additional nuget source'
                 type: string
                 required: false
-            publish-aot:
-                description: 'Use native aot Compiler'
-                type: boolean
+            own-build-command:
+                description: 'If extraction is used, the files are extracted to disk before the app starts'
+                type: string
                 required: false
-                default: false
-            publish-trimmed:
-                description: 'Trims unused libraries to reduce the deployment size of an app when publishing a self-contained executable'
-                type: boolean
-                required: false
-                default: false
-            publish-single-file:
-                description: 'Packages the app into a platform-specific single-file executable'
-                type: boolean
-                required: false
-                default: false
-            publish-ready-to-run:
-                description: 'Compiles application assemblies as ReadyToRun (R2R) format'
-                type: boolean
-                required: false
-                default: false
-            include-native-libraries-in-single-file:
-                description: 'Include all native libraries in single file'
-                type: boolean
-                required: false
-                default: true
+                default: ''
 
         secrets:
             action-user:
@@ -275,7 +255,7 @@ jobs:
             #   run: dotnet build ${{ inputs.project }} --configuration ${{ inputs.dotnet-configuration }} --force
 
             - name: Build and publish single file
-              if: ${{ inputs.create-single-file == true && inputs.publish-aot == false && inputs.dotnet-version != '6.0.x' }}
+              if: ${{ inputs.own-build-command == '' && inputs.create-single-file == true && inputs.dotnet-version != '6.0.x' }}
               run: |
                   dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:Version=${{ inputs.product-version }} --self-contained true -o out --force
               env:
@@ -284,7 +264,7 @@ jobs:
                   NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
 
             - name: Build and publish single file
-              if: ${{ inputs.create-single-file == true && inputs.publish-aot == false && inputs.dotnet-version == '6.0.x' }}
+              if: ${{ inputs.own-build-command == '' && inputs.create-single-file == true && inputs.dotnet-version == '6.0.x' }}
               run: |
                   dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:EnableCompressionInSingleFile=true -p:Version=${{ inputs.product-version }} --self-contained true -o out --force
               env:
@@ -293,9 +273,9 @@ jobs:
                   NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
 
             - name: Build and publish single file
-              if: ${{ inputs.create-single-file == true && inputs.publish-aot == true && inputs.dotnet-version != '6.0.x' }}
+              if: ${{ inputs.own-build-command != '' }}
               run: |
-                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=${{ inputs.publish-single-file }} -p:IncludeNativeLibrariesInSingleFile=true -p:PublishReadyToRun=${{ inputs.publish-ready-to-run }} -p:PublishTrimmed=${{ inputs.publish-trimmed }} -p:PublishAot=${{ inputs.publish-aot }} -p:Version=${{ inputs.product-version }} --self-contained true -o out --force
+                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:Version=${{ inputs.product-version }} ${{ inputs.own-build-command }} -o out --force
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
