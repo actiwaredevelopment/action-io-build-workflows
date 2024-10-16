@@ -92,11 +92,8 @@ on:
                 required: false
                 default: ''
             chosen-os:
-                description: 'Choose the operating system for the build'
-                type: choice
-                options:
-                    - ubuntu-latest
-                    - windows-latest
+                description: 'Choose the operating system for the build (windows-latest, ubuntu-latest)'
+                type: string
                 default: windows-latest
 
         secrets:
