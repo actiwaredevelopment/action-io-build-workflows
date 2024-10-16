@@ -3,7 +3,12 @@ name: 'Build .NET desktop app'
 on:
     workflow_call:
         inputs:
-            dotnet-version: # id of input
+            repository:
+                description: 'The repository of the io module'
+                required: true
+                type: string
+                default: ${{ github.repository }}
+            dotnet-version:
                 description: 'The dotnet version that should be used for the build process.'
                 required: true
                 type: string
@@ -13,36 +18,51 @@ on:
                 required: true
                 type: string
                 default: ''
-            repository: # id of input
-                description: 'The repository of the io module'
-                required: true
-                type: string
-                default: ${{ github.repository }}
-            branch:
-                description: 'The name of the branch that should be checkout'
-                required: false
-                type: string
-                default: ''
-            artifact-name:
-                description: 'The name of the artifact'
-                required: false
-                type: string
-                default: 'DesktopBuildOutput'
-            rid:
-                description: 'Specification of the RID for Windows (win-x64, win-x86, win-arm, win-arm64) or Linux (linux-x64, linux-musl-x64, linux-arm, linux-arm64) or MacOS (osx-x64)'
-                required: false
-                type: string
-                default: 'win-x64'
-            create-single-file:
-                description: 'Indicates if the dotnet module should be created as a single file'
-                required: false
-                type: boolean
-                default: false
             dotnet-configuration:
                 description: 'For multiple configurations, the name of the configuration must be entered here. The default is Release'
                 required: false
                 type: string
                 default: 'Release'
+            ui-build-path:
+                description: 'Enter where to find the ui (HTML) build.'
+                required: false
+                type: string
+                default: './src/configuration/build'
+            additional-path:
+                description: 'Enter where addtional pathes should be added to the artifact.'
+                required: false
+                type: string
+                default: ''
+            rid:
+                description: 'Specification of the RID for Windows (win-x64, win-x86, win-arm, win-arm64) or Linux (linux-x64, linux-musl-x64, linux-arm, linux-arm64) or MacOS (osx-x64)'
+                required: false
+                type: string
+                default: 'win-x64'
+            artifact-name:
+                description: 'The name of the artifact'
+                required: false
+                type: string
+                default: 'DesktopBuildOutput'
+            branch:
+                description: 'The name of the branch that should be checkout'
+                required: false
+                type: string
+                default: ''
+            create-single-file:
+                description: 'Indicates if the dotnet module should be created as a single file'
+                required: false
+                type: boolean
+                default: false
+            version:
+                description: 'The version without build postfix'
+                required: false
+                type: string
+                default: '0.0.0'
+            version-postfix:
+                description: 'A postfix for the determined version'
+                required: false
+                type: string
+                default: ''
             use-cache:
                 description: 'Indication whether the cache should be used instead of artifacts'
                 required: false
@@ -53,6 +73,29 @@ on:
                 required: false
                 type: string
                 default: ${{ github.workspace }}
+            ui-build-cache-key:
+                description: 'The name of the artifact'
+                required: false
+                type: string
+                default: ''
+            ui-build-cache-path:
+                description: 'The name of the artifact'
+                required: false
+                type: string
+                default: ''
+            nuget-source-name:
+                description: 'Add additional nuget source name'
+                type: string
+                default: 'rebex'
+            nuget-source:
+                description: 'Add additional nuget source'
+                type: string
+                required: false
+            own-build-command:
+                description: 'Enter the build and publish command for dotnet applications'
+                type: string
+                required: false
+                default: ''
 
         secrets:
             action-user:
@@ -75,6 +118,10 @@ on:
                 description: Return the paths of the cache
                 value: ${{ jobs.build.outputs.cache-path }}
 
+            cache-additional-path:
+                description: Return the paths of the cache with additional path
+                value: ${{ jobs.build.outputs.cache-additional-path }}
+
 jobs:
     build:
         name: 'Build Desktop App'
@@ -83,9 +130,28 @@ jobs:
         outputs:
             download: ${{ inputs.artifact-name }}-${{ github.sha }}
             cache-path: |
+                ${{ inputs.ui-build-path }}
+                ./version.txt
+                ./out
+            cache-additional-path: |
+                ${{ inputs.ui-build-path }}
+                ${{ inputs.additional-path }}
+                ./version.txt
                 ./out
 
         steps:
+            - name: Build conditions
+              run: |
+                  echo "::group::Print build conditions"
+                  echo "Set the inputs variable repository to ${{ inputs.repository }}"
+                  echo "Set the inputs variable project to ${{ inputs.project }}"
+                  echo "Set the inputs variable dotnet to ${{ inputs.dotnet-version }}"
+                  echo "Set the inputs variable ui-build-path to ${{ inputs.ui-build-path }}"
+                  echo "Set the inputs variable create-single-file to ${{ inputs.create-single-file }}"
+                  echo "Set the inputs variable rid to ${{ inputs.rid }}"
+                  echo "Set the inputs variable artifact-name to ${{ inputs.artifact-name }}"
+                  echo "::endgroup::"
+
             - name: Checkout repository
               uses: actions/checkout@v4
               with:
@@ -97,9 +163,23 @@ jobs:
               with:
                   dotnet-version: ${{ inputs.dotnet-version }}
 
+            - name: Restore ui build output
+              if: ${{ inputs.use-cache == true && inputs.ui-build-cache-key != '' }}
+              uses: actions/cache/restore@v4
+              with:
+                  key: ${{ inputs.ui-build-cache-key }}
+                  path: ${{ inputs.ui-build-cache-path }}
+                  fail-on-cache-miss: true
+                  enableCrossOsArchive: true
+
             - name: Ensure GitHub NuGet Source
               run: |
                   dotnet nuget add source -u ${{ secrets.action-user }} -p ${{ secrets.action-token }} --store-password-in-clear-text --name github ${{ secrets.awdev-nuget-source }}
+
+            - name: Additional NuGet Source
+              if: ${{ inputs.nuget-source != '' }}
+              run: |
+                  dotnet nuget add source --name ${{ inputs.nuget-source-name }} ${{ github.workspace }}${{ inputs.nuget-source }}
 
             - name: Create npmrc
               run: |
@@ -109,7 +189,7 @@ jobs:
               run: dotnet restore ${{ inputs.project }}
 
             - name: Build and publish single file
-              if: ${{ inputs.create-single-file == true && inputs.dotnet-version != '6.0.x' }}
+              if: ${{ inputs.own-build-command == '' && inputs.create-single-file == true && inputs.dotnet-version != '6.0.x' }}
               run: |
                   dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true --self-contained true -o out --force
               env:
@@ -118,9 +198,18 @@ jobs:
                   NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
 
             - name: Build and publish single file
-              if: ${{ inputs.create-single-file == true && inputs.dotnet-version == '6.0.x' }}
+              if: ${{ inputs.own-build-command == '' && inputs.create-single-file == true && inputs.dotnet-version == '6.0.x' }}
               run: |
                   dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:EnableCompressionInSingleFile=true --self-contained true -o out --force
+              env:
+                  npm_config_userconfig: '${{ github.workspace }}/.npmrc'
+                  npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
+                  NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
+
+            - name: Build and publish single file
+              if: ${{ inputs.own-build-command == '' && inputs.create-single-file == true && inputs.dotnet-version != '6.0.x' }}
+              run: |
+                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} ${{ inputs.own-build-command}} -o out --force
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
@@ -135,20 +224,73 @@ jobs:
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
                   NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
 
+            - name: 'Create version information'
+              uses: finnp/create-file-action@master
+              env:
+                  FILE_NAME: './version.txt'
+                  FILE_DATA: '${{ inputs.version }}${{ inputs.version-postfix }}'
+
+            - name: Add follow items to artifact
+              if: inputs.additional-path == ''
+              run: |
+                  echo "::group::Added files to artifact"
+                  echo "${{ inputs.ui-build-path }}"
+                  echo "./version.txt"
+                  echo "./out"
+                  echo "::endgroup::"
+
+            - name: Add follow items to artifact with addtional path
+              if: inputs.additional-path != ''
+              run: |
+                  echo "::group::Added files to artifact"
+                  echo "${{ inputs.ui-build-path }}"
+                  echo "${{ inputs.additional-path }}"
+                  echo "./version.txt"
+                  echo "./out"
+                  echo "::endgroup::"
+
             - name: 'Upload the Publish Artifact'
-              if: inputs.use-cache == false
               uses: actions/upload-artifact@v4
+              if: inputs.additional-path == '' && inputs.use-cache == false
               with:
                   name: ${{ inputs.artifact-name }}
                   path: |
+                      ${{ inputs.ui-build-path }}
+                      ./version.txt
                       ./out
                   retention-days: 1
 
             - name: 'Upload the Publish Artifact'
-              if: inputs.use-cache == true
+              uses: actions/upload-artifact@v4
+              if: inputs.additional-path != '' && inputs.use-cache == false
+              with:
+                  name: ${{ inputs.artifact-name }}
+                  path: |
+                      ${{ inputs.ui-build-path }}
+                      ${{ inputs.additional-path }}
+                      ./version.txt
+                      ./out
+                  retention-days: 1
+
+            - name: 'Upload to cache'
+              if: inputs.additional-path == '' && inputs.use-cache == true
               uses: actions/cache/save@v4
               with:
                   key: ${{ inputs.artifact-name }}-${{ github.sha }}
                   path: |
+                      ${{ inputs.ui-build-path }}
+                      ./version.txt
+                      ./out
+                  enableCrossOsArchive: true
+
+            - name: 'Upload to cache with addtional path'
+              if: inputs.additional-path != '' && inputs.use-cache == true
+              uses: actions/cache/save@v4
+              with:
+                  key: ${{ inputs.artifact-name }}-${{ github.sha }}
+                  path: |
+                      ${{ inputs.ui-build-path }}
+                      ${{ inputs.additional-path }}
+                      ./version.txt
                       ./out
                   enableCrossOsArchive: true
