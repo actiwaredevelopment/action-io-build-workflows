@@ -1,0 +1,402 @@
+name: Build .net io module
+
+on:
+    workflow_call:
+        inputs:
+            repository: # id of input
+                description: 'The repository of the io module'
+                required: true
+                type: string
+                default: ${{ github.repository }}
+            dotnet-version: # id of input
+                description: 'The dotnet version that should be used for the build process.'
+                required: true
+                type: string
+                default: 6.0.x
+            project:
+                description: 'The project that should be build'
+                required: true
+                type: string
+                default: ''
+            dotnet-configuration:
+                description: 'For multiple configurations, the name of the configuration must be entered here. The default is Release'
+                required: false
+                type: string
+                default: 'Release'
+            modulefile:
+                description: 'How to name the output file (ZIP archive) for the module'
+                required: true
+                type: string
+                default: 'module.zip'
+            module-artifact:
+                description: 'If given, the artifact will be downloaded before zipping the module'
+                required: false
+                type: string
+            module-artifact-path:
+                description: 'Where to download the module artifact'
+                required: false
+                type: string
+                default: './'
+            module-source-path:
+                description: 'Enter the source path for the module from which the ZIP file is to be created.'
+                required: false
+                type: string
+                default: './module-definition'
+            module-info-json:
+                description: 'Enter where to find the info.json for the module.'
+                required: false
+                type: string
+                default: './module-definition/info.json'
+            module-languages:
+                description: 'Enter where to find the language files for the module.'
+                required: false
+                type: string
+                default: './module-definition/languages'
+            module-aip-setup:
+                description: 'Enter where to find the advanced installer project for the module.'
+                required: false
+                type: string
+                default: 'src/setup/setup-module.aip'
+            ui-build-path:
+                description: 'Enter where to find the ui (HTML) build.'
+                required: false
+                type: string
+                default: './src/configuration/build'
+            additional-path:
+                description: 'Enter where addtional pathes should be added to the artifact.'
+                required: false
+                type: string
+                default: ''
+            dockerfile:
+                description: 'The name of the docker file that should be added to the download'
+                required: false
+                type: string
+                default: './.github/docker/dockerfile'
+            create-single-file:
+                description: 'Indicates if the dotnet module should be created as a single file'
+                required: false
+                type: boolean
+                default: false
+            rid:
+                description: 'Specification of the RID for Windows (win-x64, win-x86, win-arm, win-arm64) or Linux (linux-x64, linux-musl-x64, linux-arm, linux-arm64) or MacOS (osx-x64)'
+                required: false
+                type: string
+                default: 'linux-x64'
+            artifact-name:
+                description: 'The name of the artifact'
+                required: false
+                type: string
+                default: 'BuildOutput'
+            branch:
+                description: 'The name of the branch that should be checkout'
+                required: false
+                type: string
+                default: ''
+            version-postfix:
+                description: 'A postfix for the determined version'
+                required: false
+                type: string
+                default: ''
+            use-cache:
+                description: 'Indication whether the cache should be used instead of artifacts'
+                required: false
+                type: boolean
+                default: false
+            ui-build-cache-key:
+                description: 'The name of the artifact'
+                required: false
+                type: string
+                default: ''
+            ui-build-cache-path:
+                description: 'The name of the artifact'
+                required: false
+                type: string
+                default: ''
+            nuget-source-name:
+                description: 'Add additional nuget source name'
+                type: string
+                default: 'rebex'
+            nuget-source:
+                description: 'Add additional nuget source'
+                type: string
+                required: false
+
+        secrets:
+            action-user:
+                required: true
+            action-token:
+                required: true
+            awdev-nuget-source:
+                required: true
+            npm-package-token:
+                required: true
+            npmrc-config:
+                required: true
+
+        outputs:
+            download:
+                description: Return the name of the artifact download
+                value: ${{ jobs.build.outputs.download }}
+
+            cache-path:
+                description: Return the paths of the cache
+                value: ${{ jobs.build.outputs.cache-path }}
+
+            cache-additional-path:
+                description: Return the paths of the cache with additional path
+                value: ${{ jobs.build.outputs.cache-additional-path }}
+
+jobs:
+    build:
+        name: Build for ${{ inputs.rid }}
+        runs-on: windows-latest
+
+        outputs:
+            download: ${{ inputs.artifact-name }}-${{ github.sha }}
+            cache-path: |
+                ${{ github.workspace }}/${{ inputs.modulefile }}
+                ${{ inputs.module-info-json }}
+                ${{ inputs.ui-build-path }}
+                ${{ inputs.module-languages }}
+                ${{ inputs.module-aip-setup }}
+                ./dockerfile
+                ./version.txt
+                ./out
+            cache-additional-path: |
+                ${{ github.workspace }}/${{ inputs.modulefile }}
+                ${{ inputs.module-info-json }}
+                ${{ inputs.ui-build-path }}
+                ${{ inputs.module-languages }}
+                ${{ inputs.module-aip-setup }}
+                ${{ inputs.additional-path }}
+                ./dockerfile
+                ./version.txt
+                ./out
+
+        steps:
+            - name: Build conditions
+              run: |
+                  echo "::group::Print build conditions"
+                  echo "Set the inputs variable repository to ${{ inputs.repository }}"
+                  echo "Set the inputs variable project to ${{ inputs.project }}"
+                  echo "Set the inputs variable dotnet to ${{ inputs.dotnet-version }}"
+                  echo "Set the inputs variable modulefile to ${{ inputs.modulefile }}"
+                  echo "Set the inputs variable module-source-path to ${{ inputs.module-source-path }}"
+                  echo "Set the inputs variable module-info-json to ${{ inputs.module-info-json }}"
+                  echo "Set the inputs variable ui-build-path to ${{ inputs.ui-build-path }}"
+                  echo "Set the inputs variable dockerfile to ${{ inputs.dockerfile }}"
+                  echo "Set the inputs variable create-single-file to ${{ inputs.create-single-file }}"
+                  echo "Set the inputs variable rid to ${{ inputs.rid }}"
+                  echo "Set the inputs variable artifact-name to ${{ inputs.artifact-name }}"
+                  echo "::endgroup::"
+
+            - name: Checkout repository
+              run: |
+                  git clone https://${{secrets.action-user}}:${{secrets.action-token}}@github.com/${{ inputs.repository }}.git .
+
+                  if [ ${{ inputs.branch }} != '' ]
+                  then
+                    if [[ ${{ inputs.branch }} == tags* ]]
+                    then
+                      git checkout ${{ inputs.branch }} -b latest
+                    else
+                      git checkout ${{ inputs.branch }}
+                    fi
+                  fi
+
+                  mv ${{ inputs.dockerfile }} ./dockerfile
+
+            - name: Restore ui build output
+              if: ${{ inputs.use-cache == true && inputs.ui-build-cache-key != '' }}
+              uses: actions/cache/restore@v4
+              with:
+                  key: ${{ inputs.ui-build-cache-key }}
+                  path: ${{ inputs.ui-build-cache-path }}
+                  fail-on-cache-miss: true
+                  enableCrossOsArchive: true
+
+            - name: Download additional files for module
+              if: inputs.module-artifact != '' && inputs.use-cache == false
+              uses: actions/download-artifact@v4
+              with:
+                  name: ${{ inputs.module-artifact }}
+                  path: ${{ inputs.module-artifact-path }}
+                  fail-on-cache-miss: true
+                  enableCrossOsArchive: true
+
+            - name: Restore cache for additional files for module
+              if: inputs.module-artifact != '' && inputs.use-cache == true
+              uses: actions/cache/restore@v4
+              with:
+                  key: ${{ inputs.module-artifact }}
+                  path: ${{ inputs.module-artifact-path }}
+                  fail-on-cache-miss: true
+                  enableCrossOsArchive: true
+
+            - name: Display structure of downloaded files
+              run: ls -laR1
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: ${{ inputs.dotnet-version }}
+
+            - name: Ensure GitHub NuGet Source
+              run: |
+                  dotnet nuget add source -u ${{ secrets.action-user }} -p ${{ secrets.action-token }} --store-password-in-clear-text --name github ${{ secrets.awdev-nuget-source }}
+
+            - name: Additional NuGet Source
+              if: ${{ inputs.nuget-source != '' }}
+              run: |
+                  dotnet nuget add source --name ${{ inputs.nuget-source-name }} ${{ github.workspace }}${{ inputs.nuget-source }}
+
+            - name: Create npmrc
+              run: |
+                  echo "${{ secrets.npmrc-config }}" > .npmrc
+
+            - name: Get module version
+              id: module-version
+              uses: actiwaredevelopment/action-io-get-module-version@v0.1
+              with:
+                  module-definition-file: ${{ inputs.module-info-json }}
+
+            - name: Restore dependencies
+              run: dotnet restore ${{ inputs.project }}
+
+            # - name: Build
+            #   run: dotnet build ${{ inputs.project }} --configuration ${{ inputs.dotnet-configuration }} --force
+
+            - name: Build and publish single file
+              if: ${{ inputs.create-single-file == true && inputs.dotnet-version != '6.0.x' }}
+              run: |
+                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:Version=${{ steps.module-version.outputs.version }} --self-contained true -o out --force
+              env:
+                  npm_config_userconfig: '${{ github.workspace }}/.npmrc'
+                  npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
+                  NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
+
+            - name: Build and publish single file
+              if: ${{ inputs.create-single-file == true && inputs.dotnet-version == '6.0.x' }}
+              run: |
+                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:EnableCompressionInSingleFile=true -p:Version=${{ steps.module-version.outputs.version }} --self-contained true -o out --force
+              env:
+                  npm_config_userconfig: '${{ github.workspace }}/.npmrc'
+                  npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
+                  NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
+
+            - name: Build and publish
+              if: ${{ inputs.create-single-file == false }}
+              run: |
+                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:Version=${{ steps.module-version.outputs.version }} --self-contained false -o out --force
+              env:
+                  npm_config_userconfig: '${{ github.workspace }}/.npmrc'
+                  npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
+                  NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
+
+            - name: 'Create module definition file'
+              uses: vimtor/action-zip@v1
+              with:
+                  dest: ${{ inputs.modulefile }}
+                  files: ${{ inputs.module-source-path }}
+                  recursive: true
+
+            - name: 'Create version information'
+              uses: finnp/create-file-action@master
+              env:
+                  FILE_NAME: './version.txt'
+                  FILE_DATA: '${{ steps.module-version.outputs.version }}${{ inputs.version-postfix }}'
+
+            - name: Add follow items to artifact
+              if: inputs.additional-path == ''
+              run: |
+                  echo "::group::Added files to artifact"
+                  echo "${{ github.workspace }}/${{ inputs.modulefile }}"
+                  echo "${{ inputs.module-info-json }}"
+                  echo "${{ inputs.module-languages }}"
+                  echo "${{ inputs.module-aip-setup }}"
+                  echo "${{ inputs.ui-build-path }}"
+                  echo "./dockerfile"
+                  echo "./version.txt"
+                  echo "./out"
+                  echo "::endgroup::"
+
+            - name: Add follow items to artifact with addtional path
+              if: inputs.additional-path != ''
+              run: |
+                  echo "::group::Added files to artifact"
+                  echo "${{ github.workspace }}/${{ inputs.modulefile }}"
+                  echo "${{ inputs.module-info-json }}"
+                  echo "${{ inputs.module-languages }}"
+                  echo "${{ inputs.module-aip-setup }}"
+                  echo "${{ inputs.ui-build-path }}"
+                  echo "${{ inputs.additional-path }}"
+                  echo "./dockerfile"
+                  echo "./version.txt"
+                  echo "./out"
+                  echo "::endgroup::"
+
+            - name: 'Upload the Publish Artifact'
+              uses: actions/upload-artifact@v4
+              if: inputs.additional-path == '' && inputs.use-cache == false
+              with:
+                  name: ${{ inputs.artifact-name }}
+                  path: |
+                      ${{ github.workspace }}/${{ inputs.modulefile }}
+                      ${{ inputs.module-info-json }}
+                      ${{ inputs.ui-build-path }}
+                      ${{ inputs.module-languages }}
+                      ${{ inputs.module-aip-setup }}
+                      ./dockerfile
+                      ./version.txt
+                      ./out
+                  retention-days: 1
+
+            - name: 'Upload the Publish Artifact with addtional path'
+              uses: actions/upload-artifact@v4
+              if: inputs.additional-path != '' && inputs.use-cache == false
+              with:
+                  name: ${{ inputs.artifact-name }}
+                  path: |
+                      ${{ github.workspace }}/${{ inputs.modulefile }}
+                      ${{ inputs.module-info-json }}
+                      ${{ inputs.ui-build-path }}
+                      ${{ inputs.module-languages }}
+                      ${{ inputs.module-aip-setup }}
+                      ${{ inputs.additional-path }}
+                      ./dockerfile
+                      ./version.txt
+                      ./out
+                  retention-days: 1
+
+            - name: 'Upload to cache'
+              if: inputs.additional-path == '' && inputs.use-cache == true
+              uses: actions/cache/save@v4
+              with:
+                  key: ${{ inputs.artifact-name }}-${{ github.sha }}
+                  path: |
+                      ${{ github.workspace }}/${{ inputs.modulefile }}
+                      ${{ inputs.module-info-json }}
+                      ${{ inputs.ui-build-path }}
+                      ${{ inputs.module-languages }}
+                      ${{ inputs.module-aip-setup }}
+                      ./dockerfile
+                      ./version.txt
+                      ./out
+                  enableCrossOsArchive: true
+
+            - name: 'Upload to cache with addtional path'
+              if: inputs.additional-path != '' && inputs.use-cache == true
+              uses: actions/cache/save@v4
+              with:
+                  key: ${{ inputs.artifact-name }}-${{ github.sha }}
+                  path: |
+                      ${{ github.workspace }}/${{ inputs.modulefile }}
+                      ${{ inputs.module-info-json }}
+                      ${{ inputs.ui-build-path }}
+                      ${{ inputs.module-languages }}
+                      ${{ inputs.module-aip-setup }}
+                      ${{ inputs.additional-path }}
+                      ./dockerfile
+                      ./version.txt
+                      ./out
+                  enableCrossOsArchive: true
