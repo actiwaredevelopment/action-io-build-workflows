@@ -290,7 +290,7 @@ jobs:
                       SetProperty DATABASE_NAME="${{ inputs.setup-database-name }}"
                       SetProperty DEFAULT_PORT="${{ inputs.setup-service-port }}"
 
-                      SetProperty ProductCode="${{ inputs.setup-product-code }}"
+                      SetProperty ProductCode="1033:${{ inputs.setup-product-code }}"
                       SetProperty UpgradeCode="${{ inputs.setup-upgrade-code }}"
 
                       SetProperty ServiceName="${{ inputs.service-name }}"
