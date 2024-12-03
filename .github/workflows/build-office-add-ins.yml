@@ -1,0 +1,124 @@
+name: Build Office Add-Ins
+
+on:
+    workflow_call:
+        inputs:
+            repository: # id of input
+                description: 'The repository of the io module'
+                required: true
+                type: string
+                default: ${{ github.repository }}
+            branch:
+                description: 'The name of the branch that should be checkout'
+                required: false
+                type: string
+                default: ''
+            src-path:
+                description: 'Enter where to find the ui (HTML) build.'
+                required: false
+                type: string
+                default: './src/configuration'
+            build-path:
+                description: 'Enter where to find the ui (HTML) build.'
+                required: false
+                type: string
+                default: './src/configuration/build'
+            artifact-name:
+                description: 'The name of the artifact'
+                required: false
+                type: string
+                default: 'BuildUiOutput'
+            version:
+                description: 'The data for the version.txt'
+                required: false
+                type: string
+                default: '0.0.0.0000'
+
+        secrets:
+            action-user:
+                required: true
+            action-token:
+                required: true
+            awdev-nuget-source:
+                required: true
+            npm-package-token:
+                required: true
+            npmrc-config:
+                required: true
+
+        outputs:
+            cache-key:
+                description: Return the name of the artifact download
+                value: ${{ jobs.build.outputs.cache-key }}
+
+            cache-path:
+                description: Return the paths of the cache
+                value: ${{ jobs.build.outputs.cache-path }}
+
+jobs:
+    build:
+        name: Build UI
+        runs-on: ubuntu-latest
+
+        outputs:
+            cache-key: ${{ inputs.artifact-name }}-${{ github.sha }}
+            cache-path: |
+                ${{ inputs.build-path }}
+
+        steps:
+            - name: Checkout repository
+              run: |
+                  git clone https://${{secrets.action-user}}:${{secrets.action-token}}@github.com/${{ inputs.repository }}.git .
+
+                  if [ ${{ inputs.branch }} != '' ]
+                  then
+                    if [[ ${{ inputs.branch }} == tags* ]]
+                    then
+                      git checkout ${{ inputs.branch }} -b latest
+                    else
+                      git checkout ${{ inputs.branch }}
+                    fi
+                  fi
+
+            - uses: actions/setup-node@v4
+              with:
+                  always-auth: true
+                  registry-url: 'https://npm.pkg.github.com'
+                  token: ${{ secrets.action-token }}
+                  scope: '@actiwaredevelopment'
+                  cache: 'npm'
+                  cache-dependency-path: ${{ inputs.src-path }}/yarn.lock
+
+            - name: Create npmrc
+              run: |
+                  echo "${{ secrets.npmrc-config }}" > .npmrc
+
+            - name: Inject insteadOf configuration
+              run: |
+                  git config --global url."https://{{ secrets.action-user }}:${{ secrets.action-token }}@github.com/".insteadOf "https://github.com/"
+
+            - name: Build
+              run: |
+                  cd ${{ inputs.src-path }}
+                  npm install
+                  npm run build
+                  yarn licenses list --json --no-progress >> dist/third-party.json
+                  yarn licenses generate-disclaimer >> dist/disclaimer.txt
+              env:
+                  npm_config_userconfig: '${{ github.workspace }}/.npmrc'
+                  npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
+                  NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
+                  NODE_OPTIONS: '--max_old_space_size=8192'
+
+            - name: 'Create version information'
+              uses: finnp/create-file-action@master
+              env:
+                  FILE_NAME: ${{ inputs.src-path }}/dist/version.txt
+                  FILE_DATA: '${{ inputs.version }}'
+
+            - name: Add build to cache
+              uses: actions/cache/save@v4
+              with:
+                  key: ${{ inputs.artifact-name }}-${{ github.sha }}
+                  path: ${{ inputs.build-path }}
+                  enableCrossOsArchive: true
