@@ -106,7 +106,7 @@ jobs:
                   yarn licenses generate-disclaimer >> dist/disclaimer.txt
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
-                  npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
+                  #   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
                   NODE_AUTH_TOKEN: ${{ secrets.npm-package-token }}
                   NODE_OPTIONS: '--max_old_space_size=8192'
 
