@@ -87,7 +87,7 @@ jobs:
                   token: ${{ secrets.action-token }}
                   scope: '@actiwaredevelopment'
                   cache: 'npm'
-                  cache-dependency-path: ${{ inputs.src-path }}/yarn.lock
+                  cache-dependency-path: ${{ inputs.src-path }}/package-lock.json
 
             - name: Create npmrc
               run: |
