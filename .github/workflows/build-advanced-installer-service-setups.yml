@@ -159,7 +159,7 @@ on:
                 type: string
                 default: ${{ github.workspace }}
             version:
-                description: 'The full version number {MAJOR}.{MINOR}.{BUILD}.{PATCH}'
+                description: 'The full version number {MAJOR}.{MINOR}.{PATCH}.{BUILD}'
                 required: false
                 type: string
                 default: '3.0.0.0000'
@@ -191,9 +191,9 @@ jobs:
         runs-on: windows-latest
 
         outputs:
-            setup-cache-key: ${{ inputs.artifact-setup }}-${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.build-version }}-${{ github.sha }}
-            setup-cache-path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.build-version }}.exe
-            setup-cache-file: ${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.build-version }}.exe
+            setup-cache-key: ${{ inputs.artifact-setup }}-${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.patch-level }}-${{ github.sha }}
+            setup-cache-path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.patch-level }}.exe
+            setup-cache-file: ${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.patch-level }}.exe
 
         steps:
             - name: Check out repository code
@@ -273,7 +273,7 @@ jobs:
                   advinst-enable-automation: 'true'
                   aip-path: ${{ inputs.aip-file }}
                   aip-build-name: Release
-                  aip-package-name: ${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.build-version }}.exe
+                  aip-package-name: ${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.patch-level }}.exe
                   aip-output-dir: ${{ github.workspace }}\out-setup
                   aip-commands: |
                       SetProperty Manufacturer="${{ inputs.manufacture }}"
@@ -327,14 +327,14 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                   name: ${{ inputs.artifact-setup }}
-                  path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.build-version }}.exe
+                  path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.patch-level }}.exe
 
             - name: Publish setup artifact to cache
               if: inputs.use-cache == true
               uses: actions/cache/save@v4
               with:
-                  key: ${{ inputs.artifact-setup }}-${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.build-version }}-${{ github.sha }}
-                  path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.build-version }}.exe
+                  key: ${{ inputs.artifact-setup }}-${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.patch-level }}-${{ github.sha }}
+                  path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.patch-level }}.exe
                   enableCrossOsArchive: true
 
     deploy-setups:
