@@ -286,6 +286,7 @@ jobs:
                       SetProperty MinorVersion="${{ inputs.minor-version }}"
                       SetProperty PatchLevel="${{ inputs.patch-level }}"
                       SetProperty BuildVersion="${{ inputs.build-version }}"
+                      SetProperty ProductVersion="${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.patch-level }}.${{ inputs.build-version }}"
 
                       SetProperty DATABASE_NAME="${{ inputs.setup-database-name }}"
                       SetProperty DEFAULT_PORT="${{ inputs.setup-service-port }}"
