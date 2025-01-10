@@ -1,0 +1,396 @@
+name: 'Build setups for modules (Advanced Installer)'
+
+on:
+    workflow_call:
+        inputs:
+            artifact: # id of input
+                description: 'The name of the artifact of the build output'
+                required: true
+                type: string
+                default: ''
+            artifact-additional: # id of input
+                description: 'The name of the additional artifact of the build output'
+                required: false
+                type: string
+                default: ''
+            artifact-additional-command: # id of input
+                description: 'An addition command for extraction'
+                required: false
+                type: string
+                default: ''
+            aip-file: # id of input
+                description: 'The destination of the advanced installer project'
+                required: false
+                type: string
+                default: 'src/setup/setup-module.aip'
+            manufacture:
+                description: 'Product manufacturer'
+                required: false
+                type: string
+                default: 'ACTIWARE Development GmbH'
+            partner:
+                description: 'Name of the partner'
+                required: false
+                type: string
+                default: 'ACTIWARE'
+            branding:
+                description: 'Product branding'
+                required: false
+                type: string
+                default: 'IO'
+            product-name:
+                description: 'Product name'
+                required: false
+                type: string
+                default: 'Template Service'
+            major-version:
+                description: 'The major version of the product'
+                required: false
+                type: string
+                default: '3'
+            minor-version:
+                description: 'The minor version of the product'
+                required: false
+                type: string
+                default: ''
+            patch-level:
+                description: 'The patch level of the product'
+                required: false
+                type: string
+                default: ''
+            build-version:
+                description: 'The build version'
+                required: false
+                type: string
+                default: ''
+            service-name:
+                description: 'The name of the windows service'
+                required: true
+                type: string
+                default: ''
+            service-display-name:
+                description: 'The display name of the windows service'
+                required: true
+                type: string
+                default: ''
+            service-description:
+                description: 'The description of the windows service'
+                required: true
+                type: string
+                default: ''
+            service-executable-name:
+                description: 'The filename of the windows service'
+                required: true
+                type: string
+                default: 'service.exe'
+            setup-name:
+                description: 'The name of setup file'
+                required: true
+                type: string
+                default: ''
+            setup-name-postfix:
+                description: 'A postfix for the file name (appended after setup-name and before .exe)'
+                required: false
+                type: string
+                default: ''
+            setup-database-name:
+                description: 'The name of the default database settings'
+                required: false
+                type: string
+                default: ''
+            setup-service-port:
+                description: 'The default port of the service'
+                required: false
+                type: string
+                default: '30000'
+            setup-product-code:
+                description: 'The product code of the setup'
+                required: true
+                type: string
+                default: ''
+            setup-upgrade-code:
+                description: 'The upgrade code of the setup'
+                required: true
+                type: string
+                default: ''
+            artifact-setup:
+                description: 'The name of setup artifact file'
+                required: true
+                type: string
+                default: ''
+            publish-target:
+                description: 'The s3 target for the bucket'
+                required: true
+                type: string
+                default: ''
+            s3-bucket:
+                description: 'The name of the S3 bucket'
+                required: false
+                type: string
+                default: 'actiware-setups'
+            sign-external:
+                description: 'Use external sign tool'
+                required: false
+                type: boolean
+                default: true
+            use-cache:
+                description: 'Indication whether the cache should be used instead of artifacts'
+                required: false
+                type: boolean
+                default: false
+            delete-cache:
+                description: 'Indication whether the cache should be delete after upload'
+                required: false
+                type: boolean
+                default: false
+            cache-path:
+                description: 'Indication whether the cache should be used instead of artifacts'
+                required: false
+                type: string
+                default: ${{ github.workspace }}
+            additional-cache-path:
+                description: 'Indication whether the cache should be used instead of artifacts'
+                required: false
+                type: string
+                default: ${{ github.workspace }}
+            version:
+                description: 'The full version number {MAJOR}.{MINOR}.{PATCH}.{BUILD}'
+                required: false
+                type: string
+                default: '3.0.0.0000'
+
+        secrets:
+            aip-license:
+                required: true
+            action-user:
+                required: true
+            action-token:
+                required: true
+            aws-access-key:
+                required: true
+            aws-secret-key:
+                required: true
+            certificate-file:
+                required: false
+            certificate-pwd:
+                required: false
+
+        outputs:
+            cache-key:
+                description: Return the key that should be used for the setup files
+                value: ${{ jobs.build-setup.outputs.setup-cache-key }}
+
+jobs:
+    build-setup:
+        name: 'Build Windows Setup'
+        runs-on: windows-latest
+
+        outputs:
+            setup-cache-key: ${{ inputs.artifact-setup }}-${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.patch-level }}-${{ github.sha }}
+            setup-cache-path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.patch-level }}.exe
+            setup-cache-file: ${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.patch-level }}.exe
+
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v4
+
+            - name: 'Download Artifact'
+              id: download
+              if: inputs.use-cache == false
+              uses: actions/download-artifact@v4
+              with:
+                  name: ${{ inputs.artifact }}
+                  path: ${{ github.workspace }}\src\setup
+
+            - name: 'Download Additional Artifact'
+              if: ${{ inputs.use-cache == false && inputs.artifact-additional != '' }}
+              id: download-additional
+              uses: actions/download-artifact@v4
+              with:
+                  name: ${{ inputs.artifact-additional }}
+                  path: ${{ github.workspace }}\src\setup
+
+            - name: 'Download from cache'
+              if: inputs.use-cache == true
+              uses: actions/cache/restore@v4
+              with:
+                  key: ${{ inputs.artifact }}
+                  restore-keys: ${{ inputs.artifact }}
+                  path: ${{ inputs.cache-path }}
+                  fail-on-cache-miss: true
+                  enableCrossOsArchive: true
+
+            - name: 'Download Additional Artifact'
+              if: ${{ inputs.use-cache == true && inputs.artifact-additional != '' }}
+              id: download-additional-cache
+              uses: actions/cache/restore@v4
+              with:
+                  key: ${{ inputs.artifact-additional }}
+                  restore-keys: ${{ inputs.artifact-additional }}
+                  path: ${{ inputs.additional-cache-path }}
+                  fail-on-cache-miss: true
+                  enableCrossOsArchive: true
+
+            - name: 'Extract web client'
+              if: ${{ inputs.artifact-additional-command != '' }}
+              run: ${{ inputs.artifact-additional-command }}
+
+            - name: 'Echo download path'
+              if: inputs.use-cache == false
+              run: echo ${{steps.download.outputs.download-path}}
+
+            - name: 'Echo download path'
+              if: ${{ inputs.use-cache == false && inputs.artifact-additional != '' }}
+              run: echo ${{steps.download-additional.outputs.download-path}}
+
+            - name: Display structure of downloaded files
+              run: Get-ChildItem -Recurse
+
+            - name: Create PFX certificate
+              if: ${{ inputs.sign-external != true }}
+              id: create-pfx
+              shell: pwsh
+              env:
+                  PFX_CONTENT: ${{ secrets.certificate-file }}
+                  WORKSPACE_PATH: ${{ inputs.aip-file }}
+              run: |
+                  $setupPath = [System.IO.Path]::GetDirectoryName($env:WORKSPACE_PATH)
+                  $pfxPath = Join-Path -Path $setupPath -ChildPath "cert.pfx";
+                  $encodedBytes = [System.Convert]::FromBase64String($env:PFX_CONTENT);
+                  Set-Content $pfxPath -Value $encodedBytes -AsByteStream;
+                  Write-Output "PFX_PATH=$($pfxPath)" >> $env:GITHUB_OUTPUT;
+
+            - name: Build AIP
+              uses: caphyon/advinst-github-action@v1.0
+              with:
+                  # advinst-version: '21.5.1'
+                  advinst-license: ${{ secrets.aip-license }}
+                  advinst-enable-automation: 'true'
+                  aip-path: ${{ inputs.aip-file }}
+                  aip-build-name: Release
+                  aip-package-name: ${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.patch-level }}.exe
+                  aip-output-dir: ${{ github.workspace }}\out-setup
+                  aip-commands: |
+                      SetProperty Manufacturer="${{ inputs.manufacture }}"
+                      SetProperty OemPartner="${{ inputs.partner }}"
+                      SetProperty OemBranding="${{ inputs.branding }}"
+                      SetProperty OemMajorRelease="${{ inputs.major-version }}"
+                      SetProperty OemProductName="${{ inputs.product-name }}"
+
+                      SetProperty MajorVersion="${{ inputs.major-version }}"
+                      SetProperty MinorVersion="${{ inputs.minor-version }}"
+                      SetProperty PatchLevel="${{ inputs.patch-level }}"
+                      SetProperty BuildVersion="${{ inputs.build-version }}"
+                      SetProperty ProductVersion="${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.patch-level }}.${{ inputs.build-version }}"
+
+                      SetProperty DATABASE_NAME="${{ inputs.setup-database-name }}"
+                      SetProperty DEFAULT_PORT="${{ inputs.setup-service-port }}"
+
+                      SetProperty ProductCode="1033:${{ inputs.setup-product-code }}"
+                      SetProperty UpgradeCode="${{ inputs.setup-upgrade-code }}"
+
+                      SetProperty ServiceName="${{ inputs.service-name }}"
+                      SetProperty ServiceNameExe="${{ inputs.service-executable-name }}"
+                      SetProperty ServiceDisplayName="${{ inputs.service-display-name }}"
+                      SetProperty ServiceDescription="${{ inputs.service-description }}"
+
+                      SetProperty SetupName="${{ inputs.setup-name }}"
+                      SetProperty PfxFile="${{ steps.create-pfx.outputs.PFX_PATH }}"
+
+                      SetVersion ${{ inputs.version }}
+
+            - name: Delete PFX certificate
+              if: ${{ inputs.sign-external != true && steps.create-pfx.outputs.PFX_PATH != '' }}
+              id: delete-pfx
+              shell: pwsh
+              env:
+                  PFX_PATH: ${{ steps.create-pfx.outputs.PFX_PATH }}
+              run: |
+                  Remove-Item -Path $env:PFX_PATH;
+
+            - name: 'Code sign a file with pfx certificate (digicert)'
+              if: ${{ inputs.sign-external == true }}
+              uses: GabrielAcostaEngler/signtool-code-sign@1.0.6
+              with:
+                  certificate: ${{ secrets.certificate-file }}
+                  cert-password: ${{ secrets.certificate-pwd }}
+                  cert-sha1: e2b39ecfadfee053184a2383e5dd0b2dc668566e
+                  timestamp-server: 'http://timestamp.digicert.com'
+                  folder: '${{ github.workspace }}\out-setup'
+
+            - name: Publish setup artifact
+              if: inputs.use-cache == false
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ${{ inputs.artifact-setup }}
+                  path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.patch-level }}.exe
+
+            - name: Publish setup artifact to cache
+              if: inputs.use-cache == true
+              uses: actions/cache/save@v4
+              with:
+                  key: ${{ inputs.artifact-setup }}-${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.patch-level }}-${{ github.sha }}
+                  path: ${{ github.workspace }}\out-setup\${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.patch-level }}.exe
+                  enableCrossOsArchive: true
+
+    deploy-setups:
+        name: 'Deploy to S3'
+        needs: [build-setup]
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v4
+
+            - name: 'Download Artifact'
+              id: download-setup
+              if: inputs.use-cache == false
+              uses: actions/download-artifact@v4
+              with:
+                  name: ${{ inputs.artifact-setup }}
+                  path: ${{ github.workspace }}/out-setup
+
+            - name: 'Use cache'
+              id: cache-setup
+              if: inputs.use-cache == true
+              uses: actions/cache/restore@v4
+              with:
+                  key: ${{ needs.build-setup.outputs.setup-cache-key }}
+                  restore-keys: ${{ needs.build-setup.outputs.setup-cache-key }}
+                  path: |
+                      ${{ needs.build-setup.outputs.setup-cache-path }}
+                  fail-on-cache-miss: true
+                  enableCrossOsArchive: true
+
+            - name: Display structure of downloaded files
+              run: find ${{ github.workspace }}
+
+            - name: 'Configure AWS Credentials'
+              uses: aws-actions/configure-aws-credentials@v1
+              with:
+                  aws-region: eu-central-1
+                  # AWS Access Key ID. This input is required if running in the GitHub hosted environment. It is optional if running in a self-hosted environment that already has AWS credentials, for example on an EC2 instance.
+                  aws-access-key-id: ${{ secrets.aws-access-key }}
+                  # AWS Secret Access Key. This input is required if running in the GitHub hosted environment. It is optional if running in a self-hosted environment that already has AWS credentials, for example on an EC2 instance.
+                  aws-secret-access-key: ${{ secrets.aws-secret-key }}
+
+            - name: 'Upload files from cache'
+              uses: actiwaredevelopment/aws-deploy-s3@v4
+              #   if: inputs.use-cache == true
+              with:
+                  # AWS Region of S3 Bucket
+                  region: eu-central-1
+                  # Name of S3 Bucket
+                  bucket: ${{ inputs.s3-bucket }}
+                  # A Local Source Directory to Upload
+                  source: ${{ github.workspace }}/out-setup
+                  # A Remote Target Directory to Upload
+                  target: '${{ inputs.publish-target }}'
+                  tags: 'version=${{ inputs.version }}'
+                  clear-target: 'false'
+
+            - name: 'Delete cache'
+              if: inputs.use-cache == true && inputs.delete-cache == true
+              uses: snnaplab/delete-branch-cache-action@v1.0.0
+              with:
+                  key: ${{ needs.build-setup.outputs.setup-cache-key }}
