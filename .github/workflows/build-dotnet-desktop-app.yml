@@ -118,3 +118,4 @@ jobs:
                   key: ${{ inputs.artifact-name }}-${{ github.sha }}
                   path: ${{ inputs.artifact-files }}
                   enableCrossOsArchive: true
+                  cache-max-age: 0
