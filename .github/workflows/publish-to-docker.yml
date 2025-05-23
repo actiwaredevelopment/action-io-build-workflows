@@ -89,24 +89,50 @@ jobs:
               run: ls -1Rp
 
             - name: Set up QEMU
-              uses: docker/setup-qemu-action@v1
+              uses: docker/setup-qemu-action@v3
 
             - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v1
+              uses: docker/setup-buildx-action@v3
 
             - name: Login to DockerHub
-              uses: docker/login-action@v1
+              uses: docker/login-action@v3
               with:
                   username: ${{ secrets.docker-username }}
                   password: ${{ secrets.docker-password }}
 
             - name: 'Build and Publish to Docker Hub'
-              uses: actiwaredevelopment/build-push-action@v2.11.2
+              uses: docker/build-push-action@v6
               with:
                   context: .
                   tags: ${{ inputs.image-name }}:${{ inputs.image-tag }}
-                  remove-tags: ${{ inputs.image-name }}:${{ inputs.remove-tags }}
-                  force-remove: ${{ inputs.force-remove }}
                   file: ${{ inputs.dockerfile }}
                   platforms: ${{ inputs.platforms }}
                   push: true
+
+            - name: Delete old Docker tag from Docker Hub
+              if: ${{ inputs.remove-tags != '' && inputs.force-remove == true }}
+              env:
+                IMAGE: ${{ inputs.image-name }}
+                TAG: ${{ inputs.remove-tags }}
+                USERNAME: ${{ secrets.docker-username }}
+                PASSWORD: ${{ secrets.docker-password }}
+              run: |
+                echo "Authenticating with Docker Hub..."
+                TOKEN=$(curl -s -H "Content-Type: application/json" \
+                  -X POST -d "{\"username\": \"$USERNAME\", \"password\": \"$PASSWORD\"}" \
+                  https://hub.docker.com/v2/users/login/ | jq -r .token)
+
+                echo "Deleting tag $TAG from image $IMAGE..."
+                STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+                  -X DELETE \
+                  -H "Authorization: JWT $TOKEN" \
+                  https://hub.docker.com/v2/repositories/${IMAGE}/tags/${TAG}/)
+
+                if [ "$STATUS" = "204" ]; then
+                  echo "✅ Tag $TAG erfolgreich gelöscht."
+                elif [ "$STATUS" = "404" ]; then
+                  echo "⚠️ Tag $TAG existiert nicht."
+                else
+                  echo "❌ Fehler beim Löschen von $TAG (Status: $STATUS)"
+                  exit 1
+                fi
