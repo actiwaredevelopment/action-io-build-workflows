@@ -189,13 +189,24 @@ jobs:
                   echo "Set the inputs variable rid to ${{ inputs.rid }}"
                   echo "Set the inputs variable artifact-name to ${{ inputs.artifact-name }}"
                   echo "::endgroup::"
+            
+            - name: Sanitize ref
+              id: sanitize
+              run: |
+                RAW_REF="${{ inputs.branch }}"
+                if [[ "$RAW_REF" == tags/* ]]; then
+                  CLEAN_REF="${RAW_REF#tags/}"
+                else
+                  CLEAN_REF="$RAW_REF"
+                fi
+                echo "ref=$CLEAN_REF" >> "$GITHUB_OUTPUT"
 
             - name: Checkout repository
               uses: actions/checkout@v4
               with: 
                   repository: ${{ inputs.repository }}
                   token: ${{secrets.action-token}}
-                  ref: ${{ inputs.branch }}
+                  ref: ${{ steps.sanitize.outputs.ref }}
 
             - name: Checkout repository
               run: |
