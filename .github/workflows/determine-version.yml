@@ -96,7 +96,7 @@ jobs:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
                   result-encoding: string
                   script: |
-                      const version = '1.0.0';
+                      const version = '${{ steps.version.outputs.result }}';
                       const [major, minor, patch] = version.split('.');
 
                       console.log(`Major: ${major}`);
