@@ -107,7 +107,11 @@ jobs:
                   tags: ${{ inputs.image-name }}:${{ inputs.image-tag }}
                   file: ${{ inputs.dockerfile }}
                   platforms: ${{ inputs.platforms }}
+                  pull: true
                   push: true
+                  sbom: true
+                  provenance: mode=max
+                  outputs: type=image,push=true
 
             - name: Delete old Docker tag from Docker Hub
               if: ${{ inputs.remove-tags != '' && inputs.force-remove == true }}
