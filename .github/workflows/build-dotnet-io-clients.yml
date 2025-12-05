@@ -132,6 +132,12 @@ on:
                 required: true
             npmrc-config:
                 required: true
+            io3-package-user:
+                required: false
+            io3-package-token:
+                required: false
+            io3-package-source:
+                required: false
 
         outputs:
             download:
@@ -150,6 +156,9 @@ jobs:
     build:
         name: Build for ${{ inputs.rid }}
         runs-on: ubuntu-latest
+
+        env:
+            HAS_IO3_PACKAGE_SOURCE: ${{ secrets.io3-package-source != '' }}
 
         outputs:
             download: ${{ inputs.artifact-name }}-${{ github.sha }}
@@ -238,6 +247,11 @@ jobs:
             - name: Ensure GitHub NuGet Source
               run: |
                   dotnet nuget add source -u ${{ secrets.action-user }} -p ${{ secrets.action-token }} --store-password-in-clear-text --name github ${{ secrets.awdev-nuget-source }}
+
+            - name: IO3 NuGet Source
+              if: ${{ env.HAS_IO3_PACKAGE_SOURCE == 'true' }}
+              run: |
+                  dotnet nuget add source -u ${{ secrets.io3-package-user }} -p ${{ secrets.io3-package-token }} --store-password-in-clear-text --name github ${{ secrets.io3-package-source }}
 
             - name: Additional NuGet Source
               if: ${{ inputs.nuget-source != '' }}
