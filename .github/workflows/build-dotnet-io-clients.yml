@@ -251,7 +251,7 @@ jobs:
             - name: IO3 NuGet Source
               if: ${{ env.HAS_IO3_PACKAGE_SOURCE == 'true' }}
               run: |
-                  dotnet nuget add source -u ${{ secrets.io3-package-user }} -p ${{ secrets.io3-package-token }} --store-password-in-clear-text --name github ${{ secrets.io3-package-source }}
+                  dotnet nuget add source -u ${{ secrets.io3-package-user }} -p ${{ secrets.io3-package-token }} --store-password-in-clear-text --name github-io3 ${{ secrets.io3-package-source }}
 
             - name: Additional NuGet Source
               if: ${{ inputs.nuget-source != '' }}
