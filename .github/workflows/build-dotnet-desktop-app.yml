@@ -49,6 +49,11 @@ on:
                 required: false
                 type: string
                 default: ''
+            lfs:
+                description: 'Whether Git LFS should be enabled when checking out the code'
+                required: false
+                type: boolean
+                default: false
 
         secrets:
             action-user:
@@ -82,6 +87,7 @@ jobs:
               with:
                   repository: ${{ inputs.repository }}
                   ref: ${{ inputs.branch }}
+                  lfs: ${{ inputs.lfs }}
 
             - uses: nuget/setup-nuget@v1
               name: Setup NuGet
