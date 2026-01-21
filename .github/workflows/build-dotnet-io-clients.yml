@@ -271,7 +271,7 @@ jobs:
             - name: Build and publish single file
               if: ${{ inputs.own-build-command == '' && inputs.create-single-file == true && inputs.dotnet-version != '6.0.x' }}
               run: |
-                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:Version=${{ inputs.product-version }} --self-contained true -o out --force
+                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:Version=${{ inputs.product-version }} -p:AssemblyVersion="${{ inputs.product-version }}" -p:FileVersion="${{ inputs.product-version }}" -p:InformationalVersion="${{ inputs.product-version }}${{ inputs.version-postfix }}-${{ github.sha }}" --self-contained true -o out --force
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
@@ -280,7 +280,7 @@ jobs:
             - name: Build and publish single file
               if: ${{ inputs.own-build-command == '' && inputs.create-single-file == true && inputs.dotnet-version == '6.0.x' }}
               run: |
-                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:EnableCompressionInSingleFile=true -p:Version=${{ inputs.product-version }} --self-contained true -o out --force
+                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesInSingleFile=true -p:EnableCompressionInSingleFile=true -p:Version=${{ inputs.product-version }} -p:AssemblyVersion="${{ inputs.product-version }}" -p:FileVersion="${{ inputs.product-version }}" -p:InformationalVersion="${{ inputs.product-version }}${{ inputs.version-postfix }}-${{ github.sha }}" --self-contained true -o out --force
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
@@ -289,7 +289,7 @@ jobs:
             - name: Build and publish single file
               if: ${{ inputs.own-build-command != '' }}
               run: |
-                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:Version=${{ inputs.product-version }} ${{ inputs.own-build-command }} -o out --force
+                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:Version=${{ inputs.product-version }} -p:AssemblyVersion="${{ inputs.product-version }}" -p:FileVersion="${{ inputs.product-version }}" -p:InformationalVersion="${{ inputs.product-version }}${{ inputs.version-postfix }}-${{ github.sha }}" ${{ inputs.own-build-command }} -o out --force
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
@@ -298,7 +298,7 @@ jobs:
             - name: Build and publish
               if: ${{ inputs.create-single-file == false }}
               run: |
-                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:Version=${{ inputs.product-version }} --self-contained false -o out --force
+                  dotnet publish ${{ inputs.project }} -c ${{ inputs.dotnet-configuration }} -r ${{ inputs.rid }} -p:Version=${{ inputs.product-version }} -p:AssemblyVersion="${{ inputs.product-version }}" -p:FileVersion="${{ inputs.product-version }}" -p:InformationalVersion="${{ inputs.product-version }}${{ inputs.version-postfix }}-${{ github.sha }}" --self-contained false -o out --force
               env:
                   npm_config_userconfig: '${{ github.workspace }}/.npmrc'
                   npm_config_globalconfig: '${{ github.workspace }}/.npmrc'
