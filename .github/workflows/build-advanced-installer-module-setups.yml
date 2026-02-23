@@ -256,16 +256,6 @@ jobs:
             - name: Display structure of downloaded files
               run: Get-ChildItem -Recurse
 
-            - name: Register duct-tape
-              if: ${{ inputs.sign-external != true }}
-              shell: pwsh
-              env:
-                DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "true"
-              run: |
-                dotnet tool install --global AzureSignTool
-                Invoke-WebRequest -UseBasicParsing -OutFile ducttape.exe -URI https://github.com/Intelecy/ducttape/releases/download/v0.0.7/ducttape.exe
-                .\ducttape.exe register
-
             - name: Build AIP
               uses: caphyon/advinst-github-action@v1.0
               with:
@@ -277,6 +267,8 @@ jobs:
                   aip-package-name: ${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.patch-level }}.exe
                   aip-output-dir: ${{ github.workspace }}\out-setup
                   aip-commands: |
+                      SetAzureKeyVaultParameters -tenant_id ${{ secrets.azure-tenant-id }} -app_id ${{ secrets.azure-client-id }} -vault_name gloablsignawdev -certificate_name ${{ secrets.azure-key-vault-cert-name }} -enable_signing
+                      SetAzureKeyVaultSecret ${{ secrets.azure-client-secret }}
                       SetProperty Manufacturer="${{ inputs.manufacture }}"
                       SetProperty OemPartner="${{ inputs.partner }}"
                       SetProperty OemBranding="${{ inputs.branding }}"
@@ -303,25 +295,7 @@ jobs:
                       SetProperty SetupName="${{ inputs.setup-name }}"
 
                       SetVersion ${{ inputs.version }}
-              env:
-                DUCTTAPE_SIGN_DESCRIPTION_URL: https://www.actiware.com
-                DUCTTAPE_SIGN_TIMESTAMP_URL_RFC3161: http://timestamp.globalsign.com/scripts/timestamp.dll
-                DUCTTAPE_SIGN_AZ_KEY_VAULT_URL: ${{ secrets.azure-key-vault-url }}
-                DUCTTAPE_SIGN_AZ_KEY_VAULT_CERT: ${{ secrets.azure-key-vault-cert-name }}
-                DUCTTAPE_SIGN_AZ_KEY_VAULT_CLIENT_ID: ${{ secrets.azure-client-id }}
-                DUCTTAPE_SIGN_AZ_KEY_VAULT_CLIENT_SECRET: ${{ secrets.azure-client-secret }}
-                DUCTTAPE_SIGN_AZ_KEY_VAULT_TENANT_ID: ${{ secrets.azure-tenant-id }}
-
-            - name: 'Code sign a file with pfx certificate (digicert)'
-              if: ${{ inputs.sign-external == true }}
-              uses: GabrielAcostaEngler/signtool-code-sign@1.0.6
-              with:
-                  certificate: ${{ secrets.certificate-file }}
-                  cert-password: ${{ secrets.certificate-pwd }}
-                  cert-sha1: e2b39ecfadfee053184a2383e5dd0b2dc668566e
-                  timestamp-server: 'http://timestamp.digicert.com'
-                  folder: '${{ github.workspace }}\out-setup'
-
+            
             - name: Publish setup artifact
               if: inputs.use-cache == false
               uses: actions/upload-artifact@v4
