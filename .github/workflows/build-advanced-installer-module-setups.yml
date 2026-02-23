@@ -182,7 +182,7 @@ on:
                 required: false
             azure-key-vault-cert-name:
                 required: false
-            azure-key-vault-url:
+            azure-key-vault-name:
                 required: false
 
         outputs:
@@ -267,7 +267,7 @@ jobs:
                   aip-package-name: ${{ inputs.setup-name }}${{ inputs.setup-name-postfix }} - ${{ inputs.major-version }}.${{ inputs.minor-version }}.${{ inputs.patch-level }}.exe
                   aip-output-dir: ${{ github.workspace }}\out-setup
                   aip-commands: |
-                      SetAzureKeyVaultParameters -tenant_id ${{ secrets.azure-tenant-id }} -app_id ${{ secrets.azure-client-id }} -vault_name gloablsignawdev -certificate_name ${{ secrets.azure-key-vault-cert-name }} -enable_signing
+                      SetAzureKeyVaultParameters -tenant_id ${{ secrets.azure-tenant-id }} -app_id ${{ secrets.azure-client-id }} -vault_name ${{ secrets.azure-key-vault-name }} -certificate_name ${{ secrets.azure-key-vault-cert-name }} -enable_signing
                       SetAzureKeyVaultSecret ${{ secrets.azure-client-secret }}
                       SetProperty Manufacturer="${{ inputs.manufacture }}"
                       SetProperty OemPartner="${{ inputs.partner }}"
