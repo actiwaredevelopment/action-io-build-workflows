@@ -179,6 +179,16 @@ on:
                 required: false
             certificate-pwd:
                 required: false
+            azure-tenant-id:
+                required: false
+            azure-client-id:
+                required: false
+            azure-client-secret:
+                required: false
+            azure-key-vault-cert-name:
+                required: false
+            azure-key-vault-url:
+                required: false
 
         outputs:
             cache-key:
@@ -251,19 +261,15 @@ jobs:
             - name: Display structure of downloaded files
               run: Get-ChildItem -Recurse
 
-            - name: Create PFX certificate
+            - name: Register duct-tape
               if: ${{ inputs.sign-external != true }}
-              id: create-pfx
               shell: pwsh
               env:
-                  PFX_CONTENT: ${{ secrets.certificate-file }}
-                  WORKSPACE_PATH: ${{ inputs.aip-file }}
+                DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "true"
               run: |
-                  $setupPath = [System.IO.Path]::GetDirectoryName($env:WORKSPACE_PATH)
-                  $pfxPath = Join-Path -Path $setupPath -ChildPath "cert.pfx";
-                  $encodedBytes = [System.Convert]::FromBase64String($env:PFX_CONTENT);
-                  Set-Content $pfxPath -Value $encodedBytes -AsByteStream;
-                  Write-Output "PFX_PATH=$($pfxPath)" >> $env:GITHUB_OUTPUT;
+                dotnet tool install --global AzureSignTool --version $(az_sign_tool_version)
+                Invoke-WebRequest -UseBasicParsing -OutFile ducttape.exe -URI https://github.com/Intelecy/ducttape/releases/download/v0.0.7/ducttape.exe
+                .\ducttape.exe register
 
             - name: Build AIP
               uses: caphyon/advinst-github-action@v1.0
@@ -300,18 +306,16 @@ jobs:
                       SetProperty ServiceDescription="${{ inputs.service-description }}"
 
                       SetProperty SetupName="${{ inputs.setup-name }}"
-                      SetProperty PfxFile="${{ steps.create-pfx.outputs.PFX_PATH }}"
 
                       SetVersion ${{ inputs.version }}
-
-            - name: Delete PFX certificate
-              if: ${{ inputs.sign-external != true && steps.create-pfx.outputs.PFX_PATH != '' }}
-              id: delete-pfx
-              shell: pwsh
               env:
-                  PFX_PATH: ${{ steps.create-pfx.outputs.PFX_PATH }}
-              run: |
-                  Remove-Item -Path $env:PFX_PATH;
+                DUCTTAPE_SIGN_DESCRIPTION_URL: https://www.actiware.com
+                DUCTTAPE_SIGN_TIMESTAMP_URL_RFC3161: http://timestamp.globalsign.com/scripts/timestamp.dll
+                DUCTTAPE_SIGN_AZ_KEY_VAULT_URL: ${{ secrets.azure-key-vault-url }}
+                DUCTTAPE_SIGN_AZ_KEY_VAULT_CERT: ${{ secrets.azure-key-vault-cert-name }}
+                DUCTTAPE_SIGN_AZ_KEY_VAULT_CLIENT_ID: ${{ secrets.azure-client-id }}
+                DUCTTAPE_SIGN_AZ_KEY_VAULT_CLIENT_SECRET: ${{ secrets.azure-client-secret }}
+                DUCTTAPE_SIGN_AZ_KEY_VAULT_TENANT_ID: ${{ secrets.azure-tenant-id }}
 
             - name: 'Code sign a file with pfx certificate (digicert)'
               if: ${{ inputs.sign-external == true }}
