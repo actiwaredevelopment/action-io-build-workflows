@@ -23,6 +23,11 @@ on:
                 required: false
                 type: string
                 default: 'src/setup/setup-module.aip'
+            advinst-version:
+                description: 'The advanced installer version to use'
+                required: false
+                type: string
+                default: ''            
             manufacture:
                 description: 'Product manufacturer'
                 required: false
@@ -264,7 +269,7 @@ jobs:
             - name: Build AIP
               uses: caphyon/advinst-github-action@v1.0
               with:
-                  # advinst-version: '21.5.1'
+                  advinst-version: ${{ inputs.advinst-version }}
                   advinst-license: ${{ secrets.aip-license }}
                   advinst-enable-automation: 'true'
                   aip-path: ${{ inputs.aip-file }}
