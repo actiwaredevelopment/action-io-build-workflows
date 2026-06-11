@@ -75,7 +75,7 @@ on:
 jobs:
     build:
         name: 'Build Desktop App'
-        runs-on: windows-latest
+        runs-on: windows-2022
 
         outputs:
             download: ${{ inputs.artifact-name }}-${{ github.sha }}
