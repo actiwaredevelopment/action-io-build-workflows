@@ -33,6 +33,11 @@ on:
                 required: false
                 type: string
                 default: '0.0.0.0000'
+            runner:
+                description: 'The runner label the UI build should run on. The bundle needs ~6.5-7 GB RAM, so the default 7 GB ubuntu-latest is borderline; pass a larger runner (e.g. ubuntu-clients, 16 GB) for headroom.'
+                required: false
+                type: string
+                default: 'ubuntu-latest'
 
         secrets:
             action-user:
@@ -58,7 +63,7 @@ on:
 jobs:
     build:
         name: Build UI
-        runs-on: ubuntu-latest
+        runs-on: ${{ inputs.runner }}
 
         outputs:
             cache-key: ${{ inputs.artifact-name }}-${{ github.sha }}
